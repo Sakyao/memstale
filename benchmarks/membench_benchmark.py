@@ -74,10 +74,15 @@ def make_judge(embedder):
         ew = _content_tokens(existing.content)
         union = nw | ew
         jac = len(nw & ew) / len(union) if union else 0.0
-        if jac >= 0.85 or sim >= 0.80:
-            # near-duplicate variants (staging vs production, env suffix):
-            # same fact, different label -> NOT a contradiction
+        if jac >= 0.85:
+            # near-duplicate text -> same fact, different label -> NOT a contradiction
             return sim * 0.1
+        if jac >= 0.7 and sim >= 0.80:
+            # same template, only the VALUE changed ("editor is Vim" -> "... Neovim"):
+            # a genuine update, even though semantic similarity is near-identical.
+            # Distinguishable from env variants (staging/production) because those
+            # add tokens, dropping Jaccard below ~0.7.
+            return sim
         if jac >= 0.2:
             # same topic, updated value -> contradiction
             return sim * (0.4 + 0.6 * min(jac * 2, 1.0))

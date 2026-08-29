@@ -1,0 +1,817 @@
+{
+  "suite": "hard_supersession_flood",
+  "description": "10 topics, each with 2 superseded versions + decoy floods. The current fact is NOT the semantically closest memory — older versions and decoys are. Only time-aware demotion of superseded facts keeps the current version in the top-k.",
+  "sessions": [
+    {
+      "session_id": 1,
+      "timestamp": "2025-01-01T09:00:00",
+      "writes": [
+        {
+          "text": "the default editor in the team is Vim",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 2,
+      "timestamp": "2025-01-02T09:00:00",
+      "writes": [
+        {
+          "text": "the default editor in the team is VS Code",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 3,
+      "timestamp": "2025-01-03T09:00:00",
+      "writes": [
+        {
+          "text": "the default editor in the team is Emacs",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 4,
+      "timestamp": "2025-01-04T09:00:00",
+      "writes": [
+        {
+          "text": "the default editor in the team is Sublime",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 5,
+      "timestamp": "2025-01-05T09:00:00",
+      "writes": [
+        {
+          "text": "the default editor in the team is Nano",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 6,
+      "timestamp": "2025-01-05T09:00:00",
+      "writes": [
+        {
+          "text": "the default editor in the team is Neovim",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 7,
+      "timestamp": "2025-01-06T09:00:00",
+      "writes": [
+        {
+          "text": "the billing service is written in Python",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 8,
+      "timestamp": "2025-01-07T09:00:00",
+      "writes": [
+        {
+          "text": "the billing service is written in Go",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 9,
+      "timestamp": "2025-01-08T09:00:00",
+      "writes": [
+        {
+          "text": "the billing service is written in Java",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 10,
+      "timestamp": "2025-01-09T09:00:00",
+      "writes": [
+        {
+          "text": "the billing service is written in Kotlin",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 11,
+      "timestamp": "2025-01-10T09:00:00",
+      "writes": [
+        {
+          "text": "the billing service is written in Scala",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 12,
+      "timestamp": "2025-01-10T09:00:00",
+      "writes": [
+        {
+          "text": "the billing service is written in Rust",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 13,
+      "timestamp": "2025-01-11T09:00:00",
+      "writes": [
+        {
+          "text": "the main datastore is Postgres",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 14,
+      "timestamp": "2025-01-12T09:00:00",
+      "writes": [
+        {
+          "text": "the main datastore is MySQL",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 15,
+      "timestamp": "2025-01-13T09:00:00",
+      "writes": [
+        {
+          "text": "the main datastore is MariaDB",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 16,
+      "timestamp": "2025-01-14T09:00:00",
+      "writes": [
+        {
+          "text": "the main datastore is SQLite",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 17,
+      "timestamp": "2025-01-15T09:00:00",
+      "writes": [
+        {
+          "text": "the main datastore is Oracle",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 18,
+      "timestamp": "2025-01-15T09:00:00",
+      "writes": [
+        {
+          "text": "the main datastore is CockroachDB",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 19,
+      "timestamp": "2025-01-16T09:00:00",
+      "writes": [
+        {
+          "text": "our cloud provider is AWS",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 20,
+      "timestamp": "2025-01-17T09:00:00",
+      "writes": [
+        {
+          "text": "our cloud provider is GCP",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 21,
+      "timestamp": "2025-01-18T09:00:00",
+      "writes": [
+        {
+          "text": "our cloud provider is Hetzner",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 22,
+      "timestamp": "2025-01-19T09:00:00",
+      "writes": [
+        {
+          "text": "our cloud provider is OVH",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 23,
+      "timestamp": "2025-01-20T09:00:00",
+      "writes": [
+        {
+          "text": "our cloud provider is Rackspace",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 24,
+      "timestamp": "2025-01-20T09:00:00",
+      "writes": [
+        {
+          "text": "our cloud provider is Azure",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 25,
+      "timestamp": "2025-01-21T09:00:00",
+      "writes": [
+        {
+          "text": "the CI system is Travis",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 26,
+      "timestamp": "2025-01-22T09:00:00",
+      "writes": [
+        {
+          "text": "the CI system is CircleCI",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 27,
+      "timestamp": "2025-01-23T09:00:00",
+      "writes": [
+        {
+          "text": "the CI system is Jenkins",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 28,
+      "timestamp": "2025-01-24T09:00:00",
+      "writes": [
+        {
+          "text": "the CI system is Buildkite",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 29,
+      "timestamp": "2025-01-25T09:00:00",
+      "writes": [
+        {
+          "text": "the CI system is Drone",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 30,
+      "timestamp": "2025-01-25T09:00:00",
+      "writes": [
+        {
+          "text": "the CI system is GitHub Actions",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 31,
+      "timestamp": "2025-01-26T09:00:00",
+      "writes": [
+        {
+          "text": "the cache layer is Memcached",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 32,
+      "timestamp": "2025-01-27T09:00:00",
+      "writes": [
+        {
+          "text": "the cache layer is Hazelcast",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 33,
+      "timestamp": "2025-01-28T09:00:00",
+      "writes": [
+        {
+          "text": "the cache layer is Couchbase",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 34,
+      "timestamp": "2025-01-01T09:00:00",
+      "writes": [
+        {
+          "text": "the cache layer is Aerospike",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 35,
+      "timestamp": "2025-01-02T09:00:00",
+      "writes": [
+        {
+          "text": "the cache layer is Redis Cluster",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 36,
+      "timestamp": "2025-01-02T09:00:00",
+      "writes": [
+        {
+          "text": "the cache layer is Redis",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 37,
+      "timestamp": "2025-01-03T09:00:00",
+      "writes": [
+        {
+          "text": "the message queue is RabbitMQ",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 38,
+      "timestamp": "2025-01-04T09:00:00",
+      "writes": [
+        {
+          "text": "the message queue is SQS",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 39,
+      "timestamp": "2025-01-05T09:00:00",
+      "writes": [
+        {
+          "text": "the message queue is Pulsar",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 40,
+      "timestamp": "2025-01-06T09:00:00",
+      "writes": [
+        {
+          "text": "the message queue is NATS",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 41,
+      "timestamp": "2025-01-07T09:00:00",
+      "writes": [
+        {
+          "text": "the message queue is Celery",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 42,
+      "timestamp": "2025-01-07T09:00:00",
+      "writes": [
+        {
+          "text": "the message queue is Kafka",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 43,
+      "timestamp": "2025-01-08T09:00:00",
+      "writes": [
+        {
+          "text": "the ORM in use is Django ORM",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 44,
+      "timestamp": "2025-01-09T09:00:00",
+      "writes": [
+        {
+          "text": "the ORM in use is Peewee",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 45,
+      "timestamp": "2025-01-10T09:00:00",
+      "writes": [
+        {
+          "text": "the ORM in use is Tortoise",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 46,
+      "timestamp": "2025-01-11T09:00:00",
+      "writes": [
+        {
+          "text": "the ORM in use is GINO",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 47,
+      "timestamp": "2025-01-12T09:00:00",
+      "writes": [
+        {
+          "text": "the ORM in use is SQLObject",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 48,
+      "timestamp": "2025-01-12T09:00:00",
+      "writes": [
+        {
+          "text": "the ORM in use is SQLAlchemy",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 49,
+      "timestamp": "2025-01-13T09:00:00",
+      "writes": [
+        {
+          "text": "the team lead is Alice",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 50,
+      "timestamp": "2025-01-14T09:00:00",
+      "writes": [
+        {
+          "text": "the team lead is Bob",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 51,
+      "timestamp": "2025-01-15T09:00:00",
+      "writes": [
+        {
+          "text": "the team lead is Carol",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 52,
+      "timestamp": "2025-01-16T09:00:00",
+      "writes": [
+        {
+          "text": "the team lead is Dave",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 53,
+      "timestamp": "2025-01-17T09:00:00",
+      "writes": [
+        {
+          "text": "the team lead is Erin",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 54,
+      "timestamp": "2025-01-17T09:00:00",
+      "writes": [
+        {
+          "text": "the team lead is Priya",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 55,
+      "timestamp": "2025-01-18T09:00:00",
+      "writes": [
+        {
+          "text": "my assigned desk is desk 9",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 56,
+      "timestamp": "2025-01-19T09:00:00",
+      "writes": [
+        {
+          "text": "my assigned desk is desk 3",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 57,
+      "timestamp": "2025-01-20T09:00:00",
+      "writes": [
+        {
+          "text": "my assigned desk is desk 21",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 58,
+      "timestamp": "2025-01-21T09:00:00",
+      "writes": [
+        {
+          "text": "my assigned desk is desk 5",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 59,
+      "timestamp": "2025-01-22T09:00:00",
+      "writes": [
+        {
+          "text": "my assigned desk is desk 17",
+          "meta": {}
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 60,
+      "timestamp": "2025-01-22T09:00:00",
+      "writes": [
+        {
+          "text": "my assigned desk is desk 14",
+          "meta": {}
+        }
+      ],
+      "probes": [
+        {
+          "id": "hsup-00",
+          "question": "What is the default editor in the team now?",
+          "expected": [
+            "the default editor in the team is Neovim"
+          ],
+          "must_not_contain": [
+            "the default editor in the team is Vim",
+            "the default editor in the team is VS Code",
+            "the default editor in the team is Emacs",
+            "the default editor in the team is Sublime",
+            "the default editor in the team is Nano"
+          ],
+          "supersedes": "the default editor in the team is Nano"
+        },
+        {
+          "id": "hsup-01",
+          "question": "What is the language the billing service is written in now?",
+          "expected": [
+            "the billing service is written in Rust"
+          ],
+          "must_not_contain": [
+            "the billing service is written in Python",
+            "the billing service is written in Go",
+            "the billing service is written in Java",
+            "the billing service is written in Kotlin",
+            "the billing service is written in Scala"
+          ],
+          "supersedes": "the billing service is written in Scala"
+        },
+        {
+          "id": "hsup-02",
+          "question": "What is the main datastore now?",
+          "expected": [
+            "the main datastore is CockroachDB"
+          ],
+          "must_not_contain": [
+            "the main datastore is Postgres",
+            "the main datastore is MySQL",
+            "the main datastore is MariaDB",
+            "the main datastore is SQLite",
+            "the main datastore is Oracle"
+          ],
+          "supersedes": "the main datastore is Oracle"
+        },
+        {
+          "id": "hsup-03",
+          "question": "What is our cloud provider now?",
+          "expected": [
+            "our cloud provider is Azure"
+          ],
+          "must_not_contain": [
+            "our cloud provider is AWS",
+            "our cloud provider is GCP",
+            "our cloud provider is Hetzner",
+            "our cloud provider is OVH",
+            "our cloud provider is Rackspace"
+          ],
+          "supersedes": "our cloud provider is Rackspace"
+        },
+        {
+          "id": "hsup-04",
+          "question": "What is the CI system now?",
+          "expected": [
+            "the CI system is GitHub Actions"
+          ],
+          "must_not_contain": [
+            "the CI system is Travis",
+            "the CI system is CircleCI",
+            "the CI system is Jenkins",
+            "the CI system is Buildkite",
+            "the CI system is Drone"
+          ],
+          "supersedes": "the CI system is Drone"
+        },
+        {
+          "id": "hsup-05",
+          "question": "What is the cache layer now?",
+          "expected": [
+            "the cache layer is Redis"
+          ],
+          "must_not_contain": [
+            "the cache layer is Memcached",
+            "the cache layer is Hazelcast",
+            "the cache layer is Couchbase",
+            "the cache layer is Aerospike",
+            "the cache layer is Redis Cluster"
+          ],
+          "supersedes": "the cache layer is Redis Cluster"
+        },
+        {
+          "id": "hsup-06",
+          "question": "What is the message queue now?",
+          "expected": [
+            "the message queue is Kafka"
+          ],
+          "must_not_contain": [
+            "the message queue is RabbitMQ",
+            "the message queue is SQS",
+            "the message queue is Pulsar",
+            "the message queue is NATS",
+            "the message queue is Celery"
+          ],
+          "supersedes": "the message queue is Celery"
+        },
+        {
+          "id": "hsup-07",
+          "question": "What is the ORM in use now?",
+          "expected": [
+            "the ORM in use is SQLAlchemy"
+          ],
+          "must_not_contain": [
+            "the ORM in use is Django ORM",
+            "the ORM in use is Peewee",
+            "the ORM in use is Tortoise",
+            "the ORM in use is GINO",
+            "the ORM in use is SQLObject"
+          ],
+          "supersedes": "the ORM in use is SQLObject"
+        },
+        {
+          "id": "hsup-08",
+          "question": "What is the team lead now?",
+          "expected": [
+            "the team lead is Priya"
+          ],
+          "must_not_contain": [
+            "the team lead is Alice",
+            "the team lead is Bob",
+            "the team lead is Carol",
+            "the team lead is Dave",
+            "the team lead is Erin"
+          ],
+          "supersedes": "the team lead is Erin"
+        },
+        {
+          "id": "hsup-09",
+          "question": "What is my assigned desk now?",
+          "expected": [
+            "my assigned desk is desk 14"
+          ],
+          "must_not_contain": [
+            "my assigned desk is desk 9",
+            "my assigned desk is desk 3",
+            "my assigned desk is desk 21",
+            "my assigned desk is desk 5",
+            "my assigned desk is desk 17"
+          ],
+          "supersedes": "my assigned desk is desk 17"
+        }
+      ]
+    }
+  ]
+}

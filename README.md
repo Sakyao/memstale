@@ -286,11 +286,33 @@ export MEMSTALE_ST_MODEL=/path/to/all-MiniLM-L6-v2   # see README notes below
 
 |  | synthetic temporal facts (ours) | membench (academic) |
 |---|---:|---:|
-| `memstale` time-aware accuracy@1 | **0.964** | 0.700 recall@1 |
-| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 0.517 recall@1 / 0.483 staleness |
-| best pure-baseline (no time) | 0.500 | 0.517 (embed/mem0) |
-| `memstale` anachronism / staleness@1 | **0.007** | **0.300** |
-| best baseline staleness | 0.257 (dense-only) | 0.050 (recency, recall@1 0.433) |
+| `memstale` time-aware accuracy@1 | **0.964** | 0.705 recall@1 |
+| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 0.513 recall@1 / 0.487 staleness |
+| best pure-baseline (no time) | 0.500 | 0.513 (embed/mem0) |
+| `memstale` anachronism / staleness@1 | **0.007** | **0.295** |
+| best baseline staleness | 0.257 (dense-only) | 0.077 (recency, recall@k 0.641) |
+
+**Hard scenarios** — `benchmarks/gen_hard_scenarios.py` generates two extra
+suites that flood memory with near-duplicates so `recall@k` actually
+discriminates (the original membench suites saturate at 1.0 for any
+strong embedder):
+
+- `hard_supersession_flood`: 10 topics, 5 superseded values per topic in
+  the same template, current value last.
+- `hard_entity_flood`: 8 services, 4 near-miss variants per service
+  (canary/eu/shadow/staging) sharing every token with the query.
+
+| scenario | metric | memstale | mem0 (SOTA) | embed | recency |
+|---|---|---:|---:|---:|---:|
+| `hard_supersession_flood` | recall@k | **1.000** | 0.500 | 0.500 | 0.400 |
+| `hard_supersession_flood` | staleness@1 | **0.200** | 0.900 | 0.900 | 0.200 |
+| `hard_entity_flood` | recall@k | **1.000** | 1.000 | 1.000 | 0.250 |
+| `hard_entity_flood` | staleness@1 | **0.000** | 0.000 | 0.000 | 0.125 |
+
+In `hard_supersession_flood`, `memstale` is **2x SOTA on recall@k** and
+~5x lower staleness — time-aware demotion of superseded values pulls the
+current fact into the top-k, while pure semantic stores drown in the
+5-value flood.
 
 **How the benchmark improved the library.** Running membench against real
 baselines surfaced four concrete bugs that are now fixed: (1) bitemporal
