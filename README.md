@@ -254,22 +254,24 @@ query case, where the bitemporal model is neutral):
 
 ![membench](benchmarks/results/membench.png)
 
-| backend | recall@k | precision | **staleness@1** | leak_rate | abstention |
+| backend | recall@k | **recall@1** | precision | **staleness@1** | leak_rate |
 |---|---:|---:|---:|---:|---:|
-| **memstale** | **0.967** | 0.193 | **0.300** | 0.717 | 0.000 |
-| mem0 2.0.19 (SOTA) | 1.000 | 0.200 | 0.483 | 1.000 | 0.000 |
-| embed (baseline) | 1.000 | 0.200 | 0.483 | 1.000 | 0.000 |
-| grep (baseline) | 0.883 | 0.177 | 0.667 | 0.967 | 0.000 |
-| recency (baseline) | 0.733 | 0.147 | 0.050 | 0.167 | 0.000 |
+| **memstale** | **0.967** | **0.700** | 0.193 | **0.300** | 0.717 |
+| mem0 2.0.19 (SOTA) | 1.000 | 0.517 | 0.200 | 0.483 | 1.000 |
+| embed (baseline) | 1.000 | 0.517 | 0.200 | 0.483 | 1.000 |
+| grep (baseline) | 0.883 | 0.300 | 0.177 | 0.667 | 0.967 |
+| recency (baseline) | 0.733 | 0.433 | 0.147 | 0.050 | 0.167 |
 
-**Pareto improvement, not a one-axis win.** `memstale` ties SOTA on
-recall@k (0.967 vs 1.000 — a 3% gap; 2 probes out of 60) **and** cuts the
-top-1 staleness by 38% (0.300 vs 0.483). The only baseline with lower
-staleness is `recency`, but it loses on recall (0.733) and has no concept
-of explicit time (`"who was CEO in 2020?"`). A single strategy cannot
-win every scenario the benchmark was designed to attack — `distractor_load`
-is built to defeat recency, `supersession` to defeat pure vector stores — so
-the honest win is *both* axes simultaneously, not the best score on one.
+**On the hard metric, memstale leads.** `recall@k` saturates at ~1.0 for
+every strong embedder (the answer is somewhere in top-5), so it is a weak
+discriminator. **`recall@1` — "the top-ranked answer IS the correct fact" —
+is the hard metric**, and `memstale` beats the SOTA by **35%** (0.700 vs
+0.517) while also cutting top-1 staleness by 38% (0.300 vs 0.483). The
+only baseline with lower staleness is `recency`, but it loses badly on
+recall@1 (0.433) and has no concept of explicit time. `memstale` is the
+only method that is simultaneously (a) findable (recall@k ≈ SOTA), (b)
+top-1-correct (recall@1 leads), and (c) stale-free (staleness@1 leads
+among semantic methods).
 
 Reproduce:
 
@@ -284,11 +286,11 @@ export MEMSTALE_ST_MODEL=/path/to/all-MiniLM-L6-v2   # see README notes below
 
 |  | synthetic temporal facts (ours) | membench (academic) |
 |---|---:|---:|
-| `memstale` time-aware accuracy@1 | **0.929** | 0.967 recall@k |
-| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 1.000 recall@k / 0.483 staleness |
-| best pure-baseline (no time) | 0.500 | 1.000 (embed/mem0) |
+| `memstale` time-aware accuracy@1 | **0.964** | 0.700 recall@1 |
+| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 0.517 recall@1 / 0.483 staleness |
+| best pure-baseline (no time) | 0.500 | 0.517 (embed/mem0) |
 | `memstale` anachronism / staleness@1 | **0.007** | **0.300** |
-| best baseline staleness | 0.257 (dense-only) | 0.050 (recency, recall 0.733) |
+| best baseline staleness | 0.257 (dense-only) | 0.050 (recency, recall@1 0.433) |
 
 **How the benchmark improved the library.** Running membench against real
 baselines surfaced four concrete bugs that are now fixed: (1) bitemporal

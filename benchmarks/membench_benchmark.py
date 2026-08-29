@@ -109,6 +109,7 @@ def grade_probe(probe: dict, returned: list[str]) -> dict:
     expected = probe.get("expected", [])
     must_not = probe.get("must_not_contain", [])
     hit = _contains_any(returned, expected)
+    hit1 = _contains_any(returned[:1], expected)  # top-1 must be the answer
     answered = bool(returned)
     stale_at_1 = (_contains_any(returned[:1], must_not) if must_not else None) if answered else None
     leaked = (_contains_any(returned, must_not) if must_not else None) if answered else None
@@ -117,6 +118,7 @@ def grade_probe(probe: dict, returned: list[str]) -> dict:
     precision = relevant / len(returned) if returned else 0.0
     return {
         "hit": hit,
+        "hit1": hit1,
         "answered": answered,
         "stale_at_1": stale_at_1,
         "leaked": leaked,
@@ -128,6 +130,7 @@ def grade_probe(probe: dict, returned: list[str]) -> dict:
 def aggregate(records: list[dict]) -> dict:
     n = len(records)
     recall = sum(1 for r in records if r["hit"]) / n
+    recall1 = sum(1 for r in records if r["hit1"]) / n
     precision = sum(r["precision"] for r in records) / n
     abstention = sum(1 for r in records if not r["answered"]) / n
     stale_records = [r for r in records if r["stale_at_1"] is not None]
@@ -137,6 +140,7 @@ def aggregate(records: list[dict]) -> dict:
     return {
         "n_probes": n,
         "recall@k": round(recall, 3),
+        "recall@1": round(recall1, 3),
         "precision@k": round(precision, 3),
         "staleness@1": round(staleness, 3) if staleness is not None else None,
         "leak_rate@k": round(leak, 3) if leak is not None else None,
@@ -346,9 +350,9 @@ def main():
         for sc in scenarios.values():
             all_rec += run_backend(b, sc)
         overall[b.name] = aggregate(all_rec)
-    print(f"{'config':12s} {'recall@k':>8s} {'precision':>9s} {'staleness@1':>11s} {'leak_rate':>9s} {'abstention':>10s}")
+    print(f"{'config':12s} {'recall@k':>8s} {'recall@1':>9s} {'precision':>9s} {'staleness@1':>11s} {'leak_rate':>9s}")
     for name, a in overall.items():
-        print(f"{name:12s} {a['recall@k']:8.3f} {a['precision@k']:9.3f} {a['staleness@1']:11.3f} {a['leak_rate@k']:9.3f} {a['abstention_rate']:10.3f}")
+        print(f"{name:12s} {a['recall@k']:8.3f} {a['recall@1']:9.3f} {a['precision@k']:9.3f} {a['staleness@1']:11.3f} {a['leak_rate@k']:9.3f}")
 
     _plot(overall, rows)
     return overall
@@ -381,15 +385,18 @@ def _plot(overall: dict, rows: dict) -> None:
     ax.bar_label(bars, fmt="%.2f", fontsize=9)
     ax.grid(axis="y", alpha=0.3)
 
-    # 2) recall@k — higher is better
+    # 2) recall@1 and recall@k — higher is better
     ax = axes[1]
-    r = [overall[n]["recall@k"] for n in names]
-    bars = ax.bar(range(len(names)), r, color=[colors[n] for n in names])
-    ax.set_title("recall@k (higher = better)")
+    width = 0.38
+    r1 = [overall[n]["recall@1"] for n in names]
+    rk = [overall[n]["recall@k"] for n in names]
+    bars1 = ax.bar([x - width / 2 for x in range(len(names))], r1, width, label="recall@1", color=[colors[n] for n in names], alpha=0.9)
+    bars2 = ax.bar([x + width / 2 for x in range(len(names))], rk, width, label="recall@k", color=[colors[n] for n in names], alpha=0.45)
+    ax.set_title("recall@1 vs recall@k (higher = better)")
     ax.set_xticks(range(len(names)))
     ax.set_xticklabels(names)
-    ax.set_ylim(0, 1.05)
-    ax.bar_label(bars, fmt="%.2f", fontsize=9)
+    ax.set_ylim(0, 1.1)
+    ax.legend(fontsize=8)
     ax.grid(axis="y", alpha=0.3)
 
     # 3) staleness by suite
