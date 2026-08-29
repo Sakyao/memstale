@@ -32,12 +32,23 @@ class AgentMemory:
         embedder: Embedder | None = None,
         conflict_threshold: float = 0.55,
         auto_resolve: bool = True,
+        freshness_weight: float = 0.0,
+        freshness_halflife_days: float = 30.0,
+        current_state_demote: bool = False,
+        stale_penalty: float = 0.02,
     ):
         self.store = MemoryStore(path)
         self.embedder = embedder or HashingEmbedder()
         self.timeline = Timeline(self.store)
         self.conflicts = ConflictResolver(self.store, self.embedder, threshold=conflict_threshold)
-        self.retriever = Retriever(self.store, self.embedder)
+        self.retriever = Retriever(
+            self.store,
+            self.embedder,
+            freshness_weight=freshness_weight,
+            freshness_halflife_days=freshness_halflife_days,
+            current_state_demote=current_state_demote,
+            stale_penalty=stale_penalty,
+        )
         self.auto_resolve = auto_resolve
         self._graph: MemoryGraph | None = None
 

@@ -33,29 +33,46 @@ def _normalize(text: str) -> str:
 
 
 class HashingEmbedder:
-    """Character n-gram hashing embedder with IDF weighting.
+    """Hashing embedder with IDF weighting: character n-grams + word tokens.
 
     * No external models, downloads or API keys.
-    * Works for both Chinese and English text (character-level n-grams).
+    * Works for both Chinese (character n-grams) and English (word tokens).
+    * Word tokens carry a weight multiplier — they carry more semantics than
+      raw character windows ("indentation" vs "indent" finally overlap).
     * Uses sub-linear TF and corpus-level IDF for better discriminability.
     """
 
-    def __init__(self, dim: int = 512, ngram_range: tuple[int, int] = (1, 3), smooth_idf: float = 1.0):
+    def __init__(
+        self,
+        dim: int = 512,
+        ngram_range: tuple[int, int] = (1, 3),
+        use_words: bool = True,
+        word_repeats: int = 3,
+        smooth_idf: float = 1.0,
+    ):
         self.dim = dim
         self.ngram_range = ngram_range
+        self.use_words = use_words
+        self.word_repeats = word_repeats
         self.smooth_idf = smooth_idf
         self._doc_freq = Counter()
         self._n_docs = 0
 
-    def _ngrams(self, text: str) -> list[str]:
+    def _features(self, text: str) -> list[str]:
         text = _normalize(text)
         if not text:
             return []
+        feats: list[str] = []
         chars = list(text)
-        grams: list[str] = []
         for n in range(self.ngram_range[0], self.ngram_range[1] + 1):
-            grams.extend("".join(chars[i : i + n]) for i in range(len(chars) - n + 1))
-        return grams
+            feats.extend("".join(chars[i : i + n]) for i in range(len(chars) - n + 1))
+        if self.use_words:
+            for w in re.findall(r"[a-z0-9]+", text):
+                if len(w) >= 2:
+                    # "w:" prefix avoids collisions with character n-grams;
+                    # repeated occurrences up-weight the word's contribution.
+                    feats.extend([f"w:{w}"] * self.word_repeats)
+        return feats
 
     def _hash_index(self, gram: str) -> int:
         # Deterministic 64-bit hash (FNV-1a) mapped into [0, dim)
@@ -70,7 +87,7 @@ class HashingEmbedder:
         seen: set[str] = set()
         for t in texts:
             seen.clear()
-            for g in self._ngrams(t):
+            for g in self._features(t):
                 if g not in seen:
                     seen.add(g)
                     self._doc_freq[g] += 1
@@ -79,7 +96,7 @@ class HashingEmbedder:
 
     def embed(self, text: str) -> np.ndarray:
         vec = np.zeros(self.dim, dtype=np.float32)
-        counts = Counter(self._ngrams(text))
+        counts = Counter(self._features(text))
         n = sum(counts.values()) or 1
         for gram, c in counts.items():
             tf = 1.0 + math.log(c)  # sub-linear TF

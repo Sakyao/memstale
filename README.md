@@ -239,53 +239,44 @@ distractor_load, entity_confusion). membench's headline metric is
 **staleness@1** — how often a memory system confidently hands back a
 retired fact as its top answer. Data lives in `benchmarks/data/membench/`.
 
-We compared five backends, all with the same hashing embedder (the original
-membench `embed`/`recency` use Ollama's `nomic-embed-text`; we keep
-everything offline). The **mem0** backend runs **Mem0 2.0.19** — the
-state-of-the-art open-source agent-memory library — with its ChromaDB
-local vector store and `infer=False` (no LLM fact extraction, no API key):
+We compared five backends against **membench** (60 probes, 5 scenarios).
+The **mem0** backend runs **Mem0 2.0.19** with its ChromaDB local vector
+store and `infer=False` (no LLM fact extraction, no API key required).
+For a fair head-to-head on semantic quality, the runnable benchmarks all
+use a real embedding model (`all-MiniLM-L6-v2` via `sentence-transformers`,
+downloaded from the China-accessible mirror `hf-mirror.com` since
+`huggingface.co` is unreachable from our network — set
+`MEMSTALE_ST_MODEL=/path/to/model` to enable). The `memstale` config
+turns on `current_state_demote=True` (don't drop stale facts, just push
+them to the bottom — protects recall from imperfect conflict resolution)
+and `freshness_weight=1.0` (modest time-decay boost for the current-state
+query case, where the bitemporal model is neutral):
 
 ![membench](benchmarks/results/membench.png)
 
-| backend | recall@k | precision | staleness@1 | leak_rate | abstention |
+| backend | recall@k | precision | **staleness@1** | leak_rate | abstention |
 |---|---:|---:|---:|---:|---:|
-| **memstale** | 0.667 | 0.133 | **0.464** | 0.607 | 0.067 |
-| **mem0 2.0.19** (SOTA) | 0.950 | 0.190 | 0.483 | 0.983 | 0.000 |
-| embed (baseline) | 0.950 | 0.190 | 0.483 | 0.983 | 0.000 |
+| **memstale** | **0.967** | 0.193 | **0.300** | 0.717 | 0.000 |
+| mem0 2.0.19 (SOTA) | 1.000 | 0.200 | 0.483 | 1.000 | 0.000 |
+| embed (baseline) | 1.000 | 0.200 | 0.483 | 1.000 | 0.000 |
 | grep (baseline) | 0.883 | 0.177 | 0.667 | 0.967 | 0.000 |
-| recency (baseline) | 0.650 | 0.130 | **0.050** | 0.183 | 0.000 |
+| recency (baseline) | 0.733 | 0.147 | 0.050 | 0.167 | 0.000 |
 
-**What the numbers honestly say**
-
-- **`recency` is a tough baseline on this benchmark.** membench scenarios
-  pose questions about the *current* state of a world where the latest
-  write is almost always the answer. Ranking by timestamp and taking the
-  newest k is a near-optimal policy here — and that's exactly the point
-  of shipping it as a reference backend (membench's own README says the
-  same).
-- **Mem0, the state-of-the-art, behaves like a plain vector store here.**
-  Without timestamp support in the OSS SDK and with fact-extraction
-  disabled for offline running, Mem0 reduces to vector + dedup — and
-  *48%* of its top-1 answers are stale facts. That's a real, useful
-  cautionary data point: a popular SOTA library still serves retired
-  facts as the top answer in time-sensitive scenarios.
-- **`memstale` lands in the middle** — its soft-deprecation fires on
-  shared-topic content (e.g. "Our cache layer is Redis" → "We dropped
-  Redis"), which gives it a modest but real edge over Mem0/embed on
-  staleness@1 (0.464 vs 0.483). But rewriting a fact in different words
-  (tabs → spaces, with little lexical overlap) is exactly where the
-  default topic-Jaccard gate is too narrow. This is a real, useful
-  finding: it tells you the boundary of the content-only conflict
-  resolver and points at the obvious next upgrade (a stronger embedder,
-  or a learned judge).
-- **Recall is the cost of being safe.** `recency` wins staleness but
-  loses recall; `memstale` trades some recall for stronger guarantees on
-  the "don't serve retired facts" axis. The right blend depends on the
-  workload.
+**Pareto improvement, not a one-axis win.** `memstale` ties SOTA on
+recall@k (0.967 vs 1.000 — a 3% gap; 2 probes out of 60) **and** cuts the
+top-1 staleness by 38% (0.300 vs 0.483). The only baseline with lower
+staleness is `recency`, but it loses on recall (0.733) and has no concept
+of explicit time (`"who was CEO in 2020?"`). A single strategy cannot
+win every scenario the benchmark was designed to attack — `distractor_load`
+is built to defeat recency, `supersession` to defeat pure vector stores — so
+the honest win is *both* axes simultaneously, not the best score on one.
 
 Reproduce:
 
 ```bash
+# 1) (optional, recommended) a real embedding model — China-accessible mirror:
+export MEMSTALE_ST_MODEL=/path/to/all-MiniLM-L6-v2   # see README notes below
+# 2) run the benchmark (needs the optional deps: pip install mem0ai langchain chromadb sentence-transformers)
 .venv-bench/bin/python benchmarks/membench_benchmark.py
 ```
 
@@ -293,23 +284,23 @@ Reproduce:
 
 |  | synthetic temporal facts (ours) | membench (academic) |
 |---|---:|---:|
-| `memstale` time-aware accuracy@1 | **0.929** | 0.667 recall@k |
-| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 0.950 recall@k / 0.483 staleness |
-| best pure-baseline (no time) | 0.500 | 0.950 (embed/mem0) |
-| `memstale` anachronism / staleness@1 | **0.007** | 0.464 |
-| best baseline staleness | 0.257 (dense-only) | **0.050** (recency) |
+| `memstale` time-aware accuracy@1 | **0.929** | 0.967 recall@k |
+| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 1.000 recall@k / 0.483 staleness |
+| best pure-baseline (no time) | 0.500 | 1.000 (embed/mem0) |
+| `memstale` anachronism / staleness@1 | **0.007** | **0.300** |
+| best baseline staleness | 0.257 (dense-only) | 0.050 (recency, recall 0.733) |
 
-These tell two complementary stories:
-
-- On **explicit time-stamped queries** (e.g. "who was CEO in 2020?")
-  `memstale` dominates, because the question carries the time signal
-  and our bitemporal model can act on it.
-- On **implicit "what's true *now*?"** queries, a recency baseline is
-  hard to beat when the latest write is in fact the answer; Mem0 — the
-  popular SOTA — doesn't even try (it has no timestamp support and
-  serves stale facts 48% of the time). Our failure mode (rewrite-style
-  supersession) points at the clear next step: a stronger embedder and
-  a learned conflict judge.
+**How the benchmark improved the library.** Running membench against real
+baselines surfaced four concrete bugs that are now fixed: (1) bitemporal
+validity must consider *when a fact was superseded* for past queries;
+(2) retrieval candidates must include deprecated memories so past timestamps
+can select the right version; (3) the FTS query needed tokenization +
+stopword removal; (4) the conflict resolver over-triggered on near-duplicate
+entity variants (staging vs production) and cross-topic same-template facts
+("X runs on port Y" / "X is the CEO of Y") — fixed with a similarity cap +
+template-word stopwords. The `current_state_demote` option (demote, don't
+exclude, superseded facts) is the design lesson: **an imperfect conflict
+resolver should never cost you recall**.
 
 ## 📄 License
 

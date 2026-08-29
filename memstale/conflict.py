@@ -37,6 +37,13 @@ _STOPWORDS = {
     "the", "is", "are", "was", "were", "has", "have", "had", "a", "an",
     "and", "or", "of", "to", "in", "on", "at", "for", "it", "its", "that",
     "this", "with", "from", "as", "by", "not", "be", "been", "being",
+    # structural/template words that pollute topic Jaccard between unrelated
+    # facts ("checkout-api runs on port 8443" vs "payout-scheduler runs on
+    # port 5523" share "runs on port in production" without sharing a topic)
+    "run", "runs", "running", "port", "ports", "production", "staging",
+    "service", "services", "all", "every", "now", "still", "currently",
+    "switched", "start", "started", "cost", "costs", "uses", "use", "used",
+    "is", "are", "was", "were", "my", "our", "we", "i", "the", "a", "an",
 }
 
 

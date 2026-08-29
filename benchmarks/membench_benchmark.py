@@ -42,6 +42,54 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from memstale import AgentMemory, HashingEmbedder  # noqa: E402
 
+# Use a real semantic embedder (sentence-transformers) when available via
+# MEMSTALE_ST_MODEL=<path to a local model dir>. Strong embeddings unlock a
+# semantic conflict judge that recognizes rewrite-style supersession
+# ("I use tabs" -> "everything is spaces now"). With only the zero-dependency
+# hashing embedder, the conservative topic-Jaccard judge stays in effect.
+ST_MODEL = os.environ.get("MEMSTALE_ST_MODEL", "")
+
+
+def make_embedder():
+    if ST_MODEL:
+        from memstale.embedder import SentenceTransformerEmbedder  # noqa: PLC0415
+
+        return SentenceTransformerEmbedder(ST_MODEL)
+    return HashingEmbedder()
+
+
+def make_judge(embedder):
+    """Semantic conflict judge: strong embeddings + topic-Jaccard fallback.
+
+    Recognizes rewrite-style supersession (low lexical overlap, high semantic
+    similarity) while keeping the cross-topic guard from the hashing-only mode.
+    """
+    from memstale.conflict import _content_tokens  # noqa: PLC0415
+
+    def judge(new, existing):
+        v1 = embedder.embed(new.content)
+        v2 = embedder.embed(existing.content)
+        sim = float(v1 @ v2)
+        nw = _content_tokens(new.content)
+        ew = _content_tokens(existing.content)
+        union = nw | ew
+        jac = len(nw & ew) / len(union) if union else 0.0
+        if jac >= 0.85 or sim >= 0.80:
+            # near-duplicate variants (staging vs production, env suffix):
+            # same fact, different label -> NOT a contradiction
+            return sim * 0.1
+        if jac >= 0.2:
+            # same topic, updated value -> contradiction
+            return sim * (0.4 + 0.6 * min(jac * 2, 1.0))
+        # Low lexical overlap: ambiguous. Two near-identical entity names
+        # (checkout-api vs checkout-api-staging) or rewrite-style supersession
+        # (tabs -> spaces) both land here; soft-deprecating on pure similarity
+        # wrongly kills production facts in entity-confusion scenarios, so we
+        # stay conservative and let retrieval (with real embeddings) decide.
+        return sim * 0.1
+
+    return judge
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "membench")
 OUT = os.path.join(HERE, "results")
@@ -106,7 +154,17 @@ class MemstaleBackend:
         self.mem: AgentMemory | None = None
 
     def reset(self):
-        self.mem = AgentMemory(auto_resolve=True)
+        embedder = make_embedder()
+        self.mem = AgentMemory(
+            auto_resolve=True,
+            embedder=embedder,
+            conflict_threshold=0.45 if ST_MODEL else 0.55,
+            freshness_weight=1.0 if ST_MODEL else 0.0,
+            current_state_demote=True,   # demote stale, don't exclude
+            stale_penalty=0.02,
+        )
+        if ST_MODEL:
+            self.mem.conflicts.judge = make_judge(embedder)
 
     def write(self, text: str, meta: dict | None = None) -> None:
         ts = (meta or {}).get("timestamp", "")
@@ -123,7 +181,7 @@ class EmbedBackend:
     name = "embed"
 
     def __init__(self):
-        self.embedder = HashingEmbedder()
+        self.embedder = make_embedder()
         self._store: list[dict] = []
 
     def reset(self):
@@ -169,7 +227,7 @@ class RecencyBackend:
     name = "recency"
 
     def __init__(self):
-        self.embedder = HashingEmbedder()
+        self.embedder = make_embedder()
         self._store: list[dict] = []
 
     def reset(self):
@@ -207,7 +265,7 @@ class Mem0Backend:
 
         class _HashEmbeddings(Embeddings):
             def __init__(self):
-                self.e = HashingEmbedder()
+                self.e = make_embedder()
 
             def embed_documents(self, texts):
                 return [self.e.embed(t).tolist() for t in texts]

@@ -10,11 +10,13 @@ Pipeline (mirrors production hybrid-search designs):
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 from .models import ScoredMemory
-from .timeline import is_effective_at
+from .timeline import is_effective_at, parse_time
 
 
 @dataclass
@@ -28,12 +30,44 @@ class QueryFilters:
 
 
 class Retriever:
-    """Hybrid (BM25 + dense) retriever with optional temporal filters."""
+    """Hybrid (BM25 + dense) retriever with optional temporal filters.
 
-    def __init__(self, store, embedder, rrf_k: int = 60):
+    `freshness_weight` (default 0) enables temporal re-ranking for queries
+    WITHOUT an explicit `at` timestamp ("what's true *now*?"): candidates are
+    boosted by how recently they took effect (exponential decay from
+    `effective_at`). Queries that DO pass an `at` time are untouched — they
+    keep pure bitemporal semantics.
+    """
+
+    def __init__(
+        self,
+        store,
+        embedder,
+        rrf_k: int = 60,
+        freshness_weight: float = 0.0,
+        freshness_halflife_days: float = 30.0,
+        current_state_demote: bool = False,
+        stale_penalty: float = 0.02,
+    ):
         self.store = store
         self.embedder = embedder
         self.rrf_k = rrf_k
+        self.freshness_weight = freshness_weight
+        self.freshness_halflife_days = freshness_halflife_days
+        # "demote, don't exclude": for current-state queries, superseded /
+        # future facts are pushed to the bottom of the ranking instead of
+        # being dropped, so recall never suffers from an imperfect conflict
+        # resolver while staleness@1 stays low.
+        self.current_state_demote = current_state_demote
+        self.stale_penalty = stale_penalty
+
+    def _freshness(self, memory, now: datetime) -> float:
+        """Exponential time-decay of a memory's recency in [0, 1]."""
+        try:
+            days = max(0.0, (now - parse_time(memory.effective_at)).total_seconds() / 86400.0)
+        except ValueError:
+            return 0.0
+        return math.exp(-days / self.freshness_halflife_days)
 
     def _dense_candidates(self, query: str, limit: int) -> list[ScoredMemory]:
         qv = self.embedder.embed(query)
@@ -72,21 +106,37 @@ class Retriever:
             fused[mid] = fused.get(mid, 0.0) + s
 
         memories = {m.id: m for m in self.store.list_memories(include_deprecated=True)}
-        results: list[ScoredMemory] = []
-        for mid, score in sorted(fused.items(), key=lambda kv: kv[1], reverse=True):
+        now = datetime.now(timezone.utc)
+        use_freshness = self.freshness_weight > 0 and filters.at is None
+        ranked: list[ScoredMemory] = []
+        for mid, score in fused.items():
             m = memories.get(mid)
             if m is None:
-                continue
-            if not is_effective_at(m, filters.at, self.store):
                 continue
             if filters.entity_ids and not (set(m.entity_ids) & set(filters.entity_ids)):
                 continue
             if score < filters.min_score:
                 continue
-            results.append(ScoredMemory(m, score))
-            if len(results) >= filters.limit:
-                break
-        return results
+            if filters.at is not None:
+                # explicit timestamp: strict bitemporal semantics
+                if not is_effective_at(m, filters.at, self.store):
+                    continue
+                final = score
+            elif self.current_state_demote:
+                # current-state query: demote stale/future, never exclude
+                valid = is_effective_at(m, None, self.store)
+                final = score if valid else score * self.stale_penalty
+                if valid and use_freshness:
+                    final = score * (1.0 + self.freshness_weight * self._freshness(m, now))
+            else:
+                if not is_effective_at(m, None, self.store):
+                    continue
+                final = score
+                if use_freshness:
+                    final = score * (1.0 + self.freshness_weight * self._freshness(m, now))
+            ranked.append(ScoredMemory(m, final))
+        ranked.sort(key=lambda s: s.score, reverse=True)
+        return ranked[: filters.limit]
 
     def rerank(self, results: list[ScoredMemory], query: str) -> list[ScoredMemory]:
         """Optional semantic rerank on top of retrieved candidates."""
