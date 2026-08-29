@@ -15,6 +15,7 @@ backends later.
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from pathlib import Path
 
@@ -173,8 +174,27 @@ class MemoryStore:
         self.update_memory(memory)
         return True
 
+    _STOPWORDS = {
+        "the", "is", "are", "was", "were", "who", "what", "when", "where",
+        "which", "why", "how", "does", "did", "do", "in", "on", "at", "of",
+        "to", "for", "a", "an", "and", "or", "with", "has", "have", "had",
+        "this", "that", "its", "it",
+    }
+
     def search_fts(self, query: str, limit: int = 20) -> list[Memory]:
-        """Sparse full-text search over memory content (BM25 by SQLite FTS5)."""
+        """Sparse full-text search over memory content (BM25 by SQLite FTS5).
+
+        The raw query is tokenized, stopwords are dropped, and terms are joined
+        with OR so a sentence-style question still matches stored facts.
+        """
+        tokens = []
+        for tok in re.findall(r"[A-Za-z0-9]+", query):
+            t = tok.lower()
+            if len(t) >= 3 and t not in self._STOPWORDS:
+                tokens.append(t)
+        if not tokens:
+            return []
+        match_query = " OR ".join(tokens)
         try:
             rows = self._conn.execute(
                 """
@@ -184,7 +204,7 @@ class MemoryStore:
                 ORDER BY bm25(memory_fts)
                 LIMIT ?
                 """,
-                (query, limit),
+                (match_query, limit),
             ).fetchall()
         except sqlite3.OperationalError:
             # Query syntax unsupported by FTS5 (e.g. special chars) -> fallback LIKE

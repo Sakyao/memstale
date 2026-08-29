@@ -12,6 +12,7 @@ LLM-as-a-judge layer — the same pattern used in production orchestration.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Callable
 
@@ -32,27 +33,45 @@ class Conflict:
 JudgeFn = Callable[[Memory, Memory], float]
 
 
+_STOPWORDS = {
+    "the", "is", "are", "was", "were", "has", "have", "had", "a", "an",
+    "and", "or", "of", "to", "in", "on", "at", "for", "it", "its", "that",
+    "this", "with", "from", "as", "by", "not", "be", "been", "being",
+}
+
+
+def _content_tokens(text: str) -> set[str]:
+    """Content-bearing tokens: alphanumeric, lowercased, stopwords removed."""
+    return {t for t in re.findall(r"[A-Za-z0-9]+", text.lower()) if len(t) > 1 and t not in _STOPWORDS}
+
+
 def default_judge(embedder) -> JudgeFn:
-    """Default conflict judge: vector similarity * shared-entity bonus.
+    """Default conflict judge: vector similarity gated by topic overlap.
 
     Returns similarity in [0, 1]. Higher means "more likely to be a
     contradictory restatement of the same fact".
+
+    Naive similarity alone over-triggers: two "X is the CEO of Y" facts about
+    *different* companies share wording and would wrongly deprecate each other.
+    We gate on the Jaccard overlap of content-bearing tokens (topic cohesion):
+    only memories about the same subject can be in conflict.
     """
 
     def judge(new: Memory, existing: Memory) -> float:
         v1 = embedder.embed(new.content)
         v2 = embedder.embed(existing.content)
         sim = float(v1 @ v2)  # normalized vectors -> cosine
-        shared = len(set(new.entity_ids) & set(existing.entity_ids))
-        overlap = len(set(new.content) & set(existing.content)) / max(
-            len(set(new.content) | set(existing.content)), 1
-        )
-        # Boost when entities overlap; penalize when they are essentially the
-        # same text (duplicate, not a contradiction).
-        score = sim * (1.0 + 0.5 * min(shared, 3))
-        if overlap > 0.85:
-            score *= 0.3
-        return score
+
+        nw = _content_tokens(new.content)
+        ew = _content_tokens(existing.content)
+        inter = nw & ew
+        union = nw | ew
+        jac = len(inter) / len(union) if union else 0.0
+
+        if jac < 0.2:
+            # different topic -> not a conflict, whatever the phrasing
+            return sim * 0.1
+        return sim * (0.4 + 0.6 * min(jac * 2, 1.0))
 
     return judge
 

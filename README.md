@@ -208,6 +208,46 @@ memstale/
 - [ ] Streaming timeline visualizer
 - [ ] `memstale[st]` sentence-transformers docs
 
+## 📊 Benchmark
+
+We built a real-world temporal fact set (29 facts across 12 topics, 28 time-aware
+queries) covering CEO changes, capital renames, version timelines, and price
+changes — facts a normal agent would encounter in production. The benchmark
+compares `memstale` against two classic-vector-memory baselines and an
+ablation that disables conflict soft-deprecation.
+
+![benchmark](benchmarks/results/benchmark.png)
+
+### Headline metrics
+
+| config | MRR | Time-Acc@1 | Stale@5 |
+|---|---:|---:|---:|
+| **memstale (full)** | **0.964** | **0.929** | **0.000** |
+| dense-only (baseline) | 0.690 | 0.464 | 0.621 |
+| bm25-only (baseline) | 0.717 | 0.500 | 0.471 |
+| no-deprecation (ablation) | 0.750 | 0.536 | 0.000 |
+
+**What this tells you**
+
+- **Time-Acc@1** = fraction of queries whose top-1 result is the fact that
+  was *true at the query's timestamp*. `memstale` nearly doubles the next
+  best baseline — the **bitemporal filter + conflict soft-deprecation** is
+  what makes the difference (compare to the *no-deprecation* ablation).
+- **Stale@5** = fraction of top-5 results that are **not** the truth at
+  query time (outdated or future facts). Plain vector memory leaks 60%+
+  stale facts; `memstale` returns zero — the agent never reads a wrong-year
+  fact again.
+- **MRR** = mean reciprocal rank of the correct time-version.
+
+Reproduce:
+
+```bash
+python -m venv .venv-bench && .venv-bench/bin/pip install matplotlib
+.venv-bench/bin/python benchmarks/benchmark.py
+```
+
+Output goes to `benchmarks/results/benchmark.png` and a metrics table on stdout.
+
 ## 📄 License
 
 MIT © [Sakya](https://github.com/Sakyao)

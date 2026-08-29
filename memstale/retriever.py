@@ -14,7 +14,7 @@ import re
 from dataclasses import dataclass, field
 
 from .models import ScoredMemory
-from .timeline import is_effective
+from .timeline import is_effective_at
 
 
 @dataclass
@@ -38,7 +38,10 @@ class Retriever:
     def _dense_candidates(self, query: str, limit: int) -> list[ScoredMemory]:
         qv = self.embedder.embed(query)
         scored = []
-        for m in self.store.list_memories():
+        # Include deprecated memories: bitemporal filtering decides validity
+        # *at query time*; a superseded fact may still be the correct answer
+        # for a past timestamp.
+        for m in self.store.list_memories(include_deprecated=True):
             mv = self.embedder.embed(m.content)
             scored.append(ScoredMemory(m, float(qv @ mv)))
         scored.sort(key=lambda s: s.score, reverse=True)
@@ -68,13 +71,13 @@ class Retriever:
         for mid, s in self._rrf(dense, self.rrf_k).items():
             fused[mid] = fused.get(mid, 0.0) + s
 
-        memories = {m.id: m for m in self.store.list_memories()}
+        memories = {m.id: m for m in self.store.list_memories(include_deprecated=True)}
         results: list[ScoredMemory] = []
         for mid, score in sorted(fused.items(), key=lambda kv: kv[1], reverse=True):
             m = memories.get(mid)
             if m is None:
                 continue
-            if not is_effective(m, filters.at):
+            if not is_effective_at(m, filters.at, self.store):
                 continue
             if filters.entity_ids and not (set(m.entity_ids) & set(filters.entity_ids)):
                 continue

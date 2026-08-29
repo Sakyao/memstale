@@ -1,0 +1,146 @@
+{
+  "_comment": "Real-world temporal fact set for benchmarking memstale. Each fact: content / entities / effective_at (when true in the world) / created_at (when discovered). Facts are based on publicly verifiable events (CEO changes, capital renames, product/version changes).",
+  "topics": [
+    {
+      "topic": "OpenAI CEO",
+      "facts": [
+        {"content": "Sam Altman is the CEO of OpenAI", "entities": ["OpenAI", "CEO"], "effective_at": "2019-01-01T00:00:00+00:00", "created_at": "2019-02-01T00:00:00+00:00"},
+        {"content": "Mira Murati is the interim CEO of OpenAI", "entities": ["OpenAI", "CEO"], "effective_at": "2023-11-18T00:00:00+00:00", "created_at": "2023-11-18T00:00:00+00:00"},
+        {"content": "Sam Altman is the CEO of OpenAI", "entities": ["OpenAI", "CEO"], "effective_at": "2023-11-30T00:00:00+00:00", "created_at": "2023-11-30T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "Who is the CEO of OpenAI in mid 2023?", "at": "2023-05-01T00:00:00+00:00", "gold": "Sam Altman is the CEO of OpenAI"},
+        {"question": "Who was running OpenAI in late November 2023?", "at": "2023-11-25T00:00:00+00:00", "gold": "Mira Murati is the interim CEO of OpenAI"},
+        {"question": "Who is the current CEO of OpenAI in 2024?", "at": "2024-01-01T00:00:00+00:00", "gold": "Sam Altman is the CEO of OpenAI"}
+      ]
+    },
+    {
+      "topic": "Twitter CEO",
+      "facts": [
+        {"content": "Jack Dorsey is the CEO of Twitter", "entities": ["Twitter", "CEO"], "effective_at": "2015-10-01T00:00:00+00:00", "created_at": "2015-10-05T00:00:00+00:00"},
+        {"content": "Parag Agrawal is the CEO of Twitter", "entities": ["Twitter", "CEO"], "effective_at": "2021-11-29T00:00:00+00:00", "created_at": "2021-11-29T00:00:00+00:00"},
+        {"content": "Elon Musk is the CEO of Twitter", "entities": ["Twitter", "CEO"], "effective_at": "2022-10-27T00:00:00+00:00", "created_at": "2022-10-28T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "Who was the CEO of Twitter in early 2022?", "at": "2022-03-01T00:00:00+00:00", "gold": "Parag Agrawal is the CEO of Twitter"},
+        {"question": "Who owns Twitter at the end of 2022?", "at": "2022-12-01T00:00:00+00:00", "gold": "Elon Musk is the CEO of Twitter"},
+        {"question": "Who was CEO of Twitter in 2018?", "at": "2018-06-01T00:00:00+00:00", "gold": "Jack Dorsey is the CEO of Twitter"}
+      ]
+    },
+    {
+      "topic": "Kazakhstan capital",
+      "facts": [
+        {"content": "The capital of Kazakhstan is Astana", "entities": ["Kazakhstan", "capital"], "effective_at": "1998-01-01T00:00:00+00:00", "created_at": "1998-01-10T00:00:00+00:00"},
+        {"content": "The capital of Kazakhstan is Nur-Sultan", "entities": ["Kazakhstan", "capital"], "effective_at": "2019-03-23T00:00:00+00:00", "created_at": "2019-03-23T00:00:00+00:00"},
+        {"content": "The capital of Kazakhstan is Astana", "entities": ["Kazakhstan", "capital"], "effective_at": "2022-09-17T00:00:00+00:00", "created_at": "2022-09-17T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "What is the capital of Kazakhstan in 2020?", "at": "2020-06-01T00:00:00+00:00", "gold": "The capital of Kazakhstan is Nur-Sultan"},
+        {"question": "What is the capital of Kazakhstan today in 2024?", "at": "2024-01-01T00:00:00+00:00", "gold": "The capital of Kazakhstan is Astana"},
+        {"question": "What was the capital of Kazakhstan in 2010?", "at": "2010-01-01T00:00:00+00:00", "gold": "The capital of Kazakhstan is Astana"}
+      ]
+    },
+    {
+      "topic": "Myanmar capital",
+      "facts": [
+        {"content": "The capital of Myanmar is Yangon", "entities": ["Myanmar", "capital"], "effective_at": "1989-01-01T00:00:00+00:00", "created_at": "1990-01-01T00:00:00+00:00"},
+        {"content": "The capital of Myanmar is Naypyidaw", "entities": ["Myanmar", "capital"], "effective_at": "2006-11-06T00:00:00+00:00", "created_at": "2006-11-06T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "What is the capital of Myanmar in 2015?", "at": "2015-01-01T00:00:00+00:00", "gold": "The capital of Myanmar is Naypyidaw"},
+        {"question": "What was the capital of Myanmar before 2006?", "at": "2003-01-01T00:00:00+00:00", "gold": "The capital of Myanmar is Yangon"}
+      ]
+    },
+    {
+      "topic": "OpenAI flagship model",
+      "facts": [
+        {"content": "GPT-4 is OpenAI's latest flagship model", "entities": ["OpenAI", "model"], "effective_at": "2023-03-14T00:00:00+00:00", "created_at": "2023-03-14T00:00:00+00:00"},
+        {"content": "GPT-4o is OpenAI's latest flagship model", "entities": ["OpenAI", "model"], "effective_at": "2024-05-13T00:00:00+00:00", "created_at": "2024-05-13T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "What is the latest OpenAI model in April 2023?", "at": "2023-04-01T00:00:00+00:00", "gold": "GPT-4 is OpenAI's latest flagship model"},
+        {"question": "What is the latest OpenAI model in mid 2024?", "at": "2024-06-01T00:00:00+00:00", "gold": "GPT-4o is OpenAI's latest flagship model"}
+      ]
+    },
+    {
+      "topic": "Microsoft Activision deal",
+      "facts": [
+        {"content": "Microsoft's acquisition of Activision Blizzard is pending regulatory approval", "entities": ["Microsoft", "Activision"], "effective_at": "2022-01-18T00:00:00+00:00", "created_at": "2022-01-19T00:00:00+00:00"},
+        {"content": "Microsoft has completed the acquisition of Activision Blizzard", "entities": ["Microsoft", "Activision"], "effective_at": "2023-10-13T00:00:00+00:00", "created_at": "2023-10-13T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "Has Microsoft acquired Activision Blizzard in 2022?", "at": "2022-08-01T00:00:00+00:00", "gold": "Microsoft's acquisition of Activision Blizzard is pending regulatory approval"},
+        {"question": "Has Microsoft acquired Activision Blizzard in early 2024?", "at": "2024-02-01T00:00:00+00:00", "gold": "Microsoft has completed the acquisition of Activision Blizzard"}
+      ]
+    },
+    {
+      "topic": "Python latest release",
+      "facts": [
+        {"content": "Python 3.12 is the latest stable Python release", "entities": ["Python", "release"], "effective_at": "2023-10-02T00:00:00+00:00", "created_at": "2023-10-03T00:00:00+00:00"},
+        {"content": "Python 3.13 is the latest stable Python release", "entities": ["Python", "release"], "effective_at": "2024-10-07T00:00:00+00:00", "created_at": "2024-10-07T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "What is the latest stable Python version in early 2024?", "at": "2024-03-01T00:00:00+00:00", "gold": "Python 3.12 is the latest stable Python release"},
+        {"question": "What is the latest stable Python version now in 2025?", "at": "2025-03-01T00:00:00+00:00", "gold": "Python 3.13 is the latest stable Python release"}
+      ]
+    },
+    {
+      "topic": "Netflix basic plan price",
+      "facts": [
+        {"content": "Netflix's basic plan costs 8.99 dollars per month", "entities": ["Netflix", "price"], "effective_at": "2019-01-01T00:00:00+00:00", "created_at": "2019-01-15T00:00:00+00:00"},
+        {"content": "Netflix's basic plan costs 9.99 dollars per month", "entities": ["Netflix", "price"], "effective_at": "2021-10-01T00:00:00+00:00", "created_at": "2021-10-01T00:00:00+00:00"},
+        {"content": "Netflix's basic plan costs 11.99 dollars per month", "entities": ["Netflix", "price"], "effective_at": "2023-10-01T00:00:00+00:00", "created_at": "2023-10-01T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "How much does Netflix's basic plan cost in 2020?", "at": "2020-06-01T00:00:00+00:00", "gold": "Netflix's basic plan costs 8.99 dollars per month"},
+        {"question": "How much does Netflix's basic plan cost in 2024?", "at": "2024-01-01T00:00:00+00:00", "gold": "Netflix's basic plan costs 11.99 dollars per month"}
+      ]
+    },
+    {
+      "topic": "Tesla Model S price",
+      "facts": [
+        {"content": "Tesla Model S starts at 69420 dollars", "entities": ["Tesla", "Model S"], "effective_at": "2019-01-01T00:00:00+00:00", "created_at": "2019-01-05T00:00:00+00:00"},
+        {"content": "Tesla Model S starts at 89990 dollars", "entities": ["Tesla", "Model S"], "effective_at": "2021-01-01T00:00:00+00:00", "created_at": "2021-01-05T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "How much is a Tesla Model S in 2020?", "at": "2020-06-01T00:00:00+00:00", "gold": "Tesla Model S starts at 69420 dollars"},
+        {"question": "How much is a Tesla Model S in 2022?", "at": "2022-06-01T00:00:00+00:00", "gold": "Tesla Model S starts at 89990 dollars"}
+      ]
+    },
+    {
+      "topic": "MacBook Pro chip",
+      "facts": [
+        {"content": "Apple's MacBook Pro uses the M1 Pro chip", "entities": ["Apple", "MacBook Pro"], "effective_at": "2021-10-18T00:00:00+00:00", "created_at": "2021-10-19T00:00:00+00:00"},
+        {"content": "Apple's MacBook Pro uses the M3 Pro chip", "entities": ["Apple", "MacBook Pro"], "effective_at": "2023-10-30T00:00:00+00:00", "created_at": "2023-10-31T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "Which chip does the MacBook Pro use in 2022?", "at": "2022-06-01T00:00:00+00:00", "gold": "Apple's MacBook Pro uses the M1 Pro chip"},
+        {"question": "Which chip does the MacBook Pro use in 2024?", "at": "2024-01-01T00:00:00+00:00", "gold": "Apple's MacBook Pro uses the M3 Pro chip"}
+      ]
+    },
+    {
+      "topic": "Intel CEO",
+      "facts": [
+        {"content": "Bob Swan is the CEO of Intel", "entities": ["Intel", "CEO"], "effective_at": "2019-01-31T00:00:00+00:00", "created_at": "2019-02-01T00:00:00+00:00"},
+        {"content": "Pat Gelsinger is the CEO of Intel", "entities": ["Intel", "CEO"], "effective_at": "2021-02-15T00:00:00+00:00", "created_at": "2021-02-15T00:00:00+00:00"},
+        {"content": "Lip-Bu Tan is the CEO of Intel", "entities": ["Intel", "CEO"], "effective_at": "2025-03-18T00:00:00+00:00", "created_at": "2025-03-18T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "Who is the CEO of Intel in mid 2020?", "at": "2020-07-01T00:00:00+00:00", "gold": "Bob Swan is the CEO of Intel"},
+        {"question": "Who is the CEO of Intel in 2023?", "at": "2023-01-01T00:00:00+00:00", "gold": "Pat Gelsinger is the CEO of Intel"},
+        {"question": "Who is the CEO of Intel in 2025?", "at": "2025-06-01T00:00:00+00:00", "gold": "Lip-Bu Tan is the CEO of Intel"}
+      ]
+    },
+    {
+      "topic": "Boeing 737 MAX status",
+      "facts": [
+        {"content": "Boeing 737 MAX is grounded worldwide", "entities": ["Boeing", "737 MAX"], "effective_at": "2019-03-13T00:00:00+00:00", "created_at": "2019-03-13T00:00:00+00:00"},
+        {"content": "Boeing 737 MAX is cleared to resume flights in the US", "entities": ["Boeing", "737 MAX"], "effective_at": "2020-11-18T00:00:00+00:00", "created_at": "2020-11-18T00:00:00+00:00"}
+      ],
+      "queries": [
+        {"question": "Is the Boeing 737 MAX flying in mid 2019?", "at": "2019-06-01T00:00:00+00:00", "gold": "Boeing 737 MAX is grounded worldwide"},
+        {"question": "Is the Boeing 737 MAX flying in 2021?", "at": "2021-03-01T00:00:00+00:00", "gold": "Boeing 737 MAX is cleared to resume flights in the US"}
+      ]
+    }
+  ]
+}

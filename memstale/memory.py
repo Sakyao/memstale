@@ -38,8 +38,15 @@ class AgentMemory:
         self.timeline = Timeline(self.store)
         self.conflicts = ConflictResolver(self.store, self.embedder, threshold=conflict_threshold)
         self.retriever = Retriever(self.store, self.embedder)
-        self.graph = MemoryGraph(self.store)
         self.auto_resolve = auto_resolve
+        self._graph: MemoryGraph | None = None
+
+    @property
+    def graph(self) -> MemoryGraph:
+        """Lazily created entity graph (needs the optional `networkx` extra)."""
+        if self._graph is None:
+            self._graph = MemoryGraph(self.store)
+        return self._graph
 
     # ------------------------------------------------------------------ #
     # write path
