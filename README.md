@@ -74,25 +74,6 @@ semantically similar?"* but are blind to truth, time and relationships.
 
 ## 🏗️ How it works
 
-### Architecture
-
-```mermaid
-flowchart TB
-    subgraph App["Agent Application"]
-        A[Python API] --> F
-        B[CLI] --> F
-        C[MCP Server] --> F
-    end
-    subgraph Core["memstale core"]
-        F[AgentMemory facade] --> S[store · SQLite + FTS5]
-        F --> T[timeline · bitemporal]
-        F --> CF[conflict · soft-deprecation]
-        F --> R[retriever · BM25 + dense + RRF]
-        F --> G[graph · entity relations]
-        F --> E[embedder · pluggable]
-    end
-```
-
 ### Conflict resolution flow
 
 ```mermaid
@@ -220,23 +201,25 @@ ablation that disables conflict soft-deprecation.
 
 ### Headline metrics
 
-| config | MRR | Time-Acc@1 | Stale@5 |
+| config | MRR | Time-Acc@1 | Anachronism@5 |
 |---|---:|---:|---:|
-| **memstale (full)** | **0.964** | **0.929** | **0.000** |
-| dense-only (baseline) | 0.690 | 0.464 | 0.621 |
-| bm25-only (baseline) | 0.717 | 0.500 | 0.471 |
-| no-deprecation (ablation) | 0.750 | 0.536 | 0.000 |
+| **memstale (full)** | **0.964** | **0.929** | **0.007** |
+| dense-only (baseline) | 0.690 | 0.464 | 0.257 |
+| bm25-only (baseline) | 0.717 | 0.500 | 0.371 |
+| no-deprecation (ablation) | 0.750 | 0.536 | 0.140 |
 
 **What this tells you**
 
 - **Time-Acc@1** = fraction of queries whose top-1 result is the fact that
   was *true at the query's timestamp*. `memstale` nearly doubles the next
   best baseline — the **bitemporal filter + conflict soft-deprecation** is
-  what makes the difference (compare to the *no-deprecation* ablation).
-- **Stale@5** = fraction of top-5 results that are **not** the truth at
-  query time (outdated or future facts). Plain vector memory leaks 60%+
-  stale facts; `memstale` returns zero — the agent never reads a wrong-year
-  fact again.
+  what makes the difference.
+- **Anachronism@5** = fraction of top-5 results that are the **wrong time
+  version** of the same-topic fact (e.g. answering "2020's CEO" with the
+  2022's one). `memstale` scores ~0; plain vector memory leaks 26–37%; and
+  the *no-deprecation* ablation (14%) shows exactly what soft-deprecation
+  contributes on top of time filtering — without the `replaced_by` link,
+  outdated versions can't be recognized and removed.
 - **MRR** = mean reciprocal rank of the correct time-version.
 
 Reproduce:

@@ -42,7 +42,8 @@ def load_facts():
         data = json.load(f)
     facts, queries = [], []
     for topic in data["topics"]:
-        facts.extend(topic["facts"])
+        for fact in topic["facts"]:
+            facts.append({**fact, "topic": topic["topic"]})
         for q in topic["queries"]:
             q = dict(q)
             q["topic"] = topic["topic"]
@@ -60,6 +61,7 @@ def build_memory(facts, auto_resolve: bool) -> AgentMemory:
             effective_at=fact["effective_at"],
             created_at=fact["created_at"],
             source="real-world",
+            metadata={"topic": fact["topic"]},
         )
     return mem
 
@@ -88,19 +90,20 @@ def bm25_only_retrieve(mem, question, at, k):
 
 def evaluate(retrieve_fn, queries, store) -> dict:
     recall = {k: [] for k in K_LIST}
-    stale = {k: [] for k in K_LIST}
+    anachro = {k: [] for k in K_LIST}
     mrr, acc1 = [], []
     misses = []
     for q in queries:
         results = retrieve_fn(q["question"], q["at"], max(K_LIST))
         contents = [m.content for m in results]
         gold = q["gold"]
+        topic = q["topic"]
         for k in K_LIST:
-            topk = contents[:k]
-            recall[k].append(1.0 if topk and gold in topk else 0.0)
-            # stale = fraction of top-k that were NOT the truth at query time
-            invalid = [m for m in results[:k] if not is_effective_at(m, q["at"], store)]
-            stale[k].append(len(invalid) / k if results else 1.0)
+            topk = results[:k]
+            recall[k].append(1.0 if topk and gold in contents[:k] else 0.0)
+            # Anachronism: same-topic results that are the WRONG time version.
+            wrong = [m for m in topk if m.metadata.get("topic") == topic and m.content != gold]
+            anachro[k].append(len(wrong) / len(topk) if topk else 0.0)
         for i, c in enumerate(contents):
             if c == gold:
                 mrr.append(1.0 / (i + 1))
@@ -112,7 +115,7 @@ def evaluate(retrieve_fn, queries, store) -> dict:
             misses.append(f"  {q['topic']:26s} at={q['at'][:10]} -> {gold[:40]}")
     return {
         "recall": {k: mean(recall[k]) for k in K_LIST},
-        "stale": {k: mean(stale[k]) for k in K_LIST},
+        "stale": {k: mean(anachro[k]) for k in K_LIST},
         "mrr": mean(mrr),
         "acc1": mean(acc1),
         "misses": misses,
@@ -140,7 +143,7 @@ def main():
                 print(m)
 
     print("\n=== Headline metrics ===")
-    print(f"{'config':28s} {'MRR':>6s} {'Time-Acc@1':>10s} {'Stale@5':>8s}")
+    print(f"{'config':28s} {'MRR':>6s} {'Time-Acc@1':>10s} {'Anachronism@5':>14s}")
     for name, r in results.items():
         print(f"{name:28s} {r['mrr']:6.3f} {r['acc1']:10.3f} {r['stale'][5]:8.3f}")
 
@@ -198,11 +201,11 @@ def _plot(results: dict) -> None:
     ax.bar_label(bars, fmt="%.2f", fontsize=8)
     ax.grid(axis="y", alpha=0.3)
 
-    # 3) Stale rate (outdated / future facts leaking into results)
+    # 3) Anachronism rate (wrong time version of same-topic fact in results)
     ax = axes[2]
     stale = [results[n]["stale"][5] for n in names]
     bars = ax.bar(range(len(names)), stale, color=[colors[n] for n in names])
-    ax.set_title("Stale facts in top-5 (lower = better)")
+    ax.set_title("Wrong time-version in top-5\n(Anachronism, lower = better)")
     ax.set_xticks(range(len(names)))
     ax.set_xticklabels([n.split(" ")[0] for n in names], rotation=20, fontsize=8)
     ax.set_ylim(0, 1.05)
