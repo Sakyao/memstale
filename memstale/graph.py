@@ -27,7 +27,7 @@ class MemoryGraph:
     def __init__(self, store):
         self.store = store
         if nx is None:  # pragma: no cover
-            raise RuntimeError("networkx is required for graph features: pip install agent-memory[graph]")
+            raise RuntimeError("networkx is required for graph features: pip install memstale[graph]")
         self._g: nx.DiGraph = nx.DiGraph()
         self._reload()
 

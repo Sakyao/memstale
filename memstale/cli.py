@@ -1,12 +1,12 @@
-"""Command-line interface for agent-memory.
+"""Command-line interface for memstale.
 
 Examples::
 
-    agent-memory add "Sakya is building agent-memory" --entity Sakya --entity agent-memory
-    agent-memory query "what is Sakya working on" -k 5
-    agent-memory timeline --entity Sakya
-    agent-memory graph --entity Sakya
-    agent-memory deprecate <memory-id>
+    memstale add "Sakya is building memstale" --entity Sakya --entity memstale
+    memstale query "what is Sakya working on" -k 5
+    memstale timeline --entity Sakya
+    memstale graph --entity Sakya
+    memstale deprecate <memory-id>
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from .memory import AgentMemory
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="agent-memory",
+        prog="memstale",
         description="Temporal-aware long-term memory for AI agents.",
     )
     parser.add_argument("--db", default=":memory:", help="SQLite path (default: :memory:)")

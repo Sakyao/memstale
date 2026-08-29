@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from agent_memory import AgentMemory, Memory
+from memstale import AgentMemory, Memory
 
 
 def _mem(content, effective_at, created_at):

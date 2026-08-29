@@ -1,4 +1,4 @@
-"""Data models for agent-memory."""
+"""Data models for memstale."""
 
 from __future__ import annotations
 

@@ -1,161 +1,191 @@
 <div align="center">
 
-# 🧠 agent-memory
+# 🧠 memstale
 
-**Temporal-aware long-term memory for AI agents** — hybrid vector + graph retrieval
-with **bitemporal facts** and **conflict soft-deprecation**.
+**Memories that never go stale.**
 
+Temporal-aware long-term memory for AI agents — bitemporal facts,
+conflict soft-deprecation, hybrid retrieval, and an entity graph.
 Zero-config · Pure Python · SQLite-backed · MCP-ready
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Tests](https://img.shields.io/badge/tests-17_passing-brightgreen?style=for-the-badge)](tests)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-8A2BE2.svg?style=for-the-badge)](https://github.com/Sakyao/agent-memory/pulls)
+[![MCP](https://img.shields.io/badge/MCP-ready-8A2BE2.svg?style=for-the-badge)](mcp_server.py)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-orange.svg?style=for-the-badge)](https://github.com/Sakyao/memstale/pulls)
 
 </div>
 
 ---
 
-## Why this exists
+## ✨ What is it?
 
-LLMs are **amnesiacs**: every conversation starts from scratch. Existing "memory"
-solutions treat memory as a *vector bag* — they answer "what is semantically
-similar" but ignore two things that actually matter:
-
-| Problem | Consequence |
-|---------|-------------|
-| ❌ **No sense of time** | Agent trusts stale facts: "the capital of France is Lyon" (effective 2099) still gets retrieved *today* |
-| ❌ **No conflict resolution** | New knowledge contradicts old facts; the agent doesn't know which to trust |
-| ❌ **No relationships** | A pure vector store can't answer "who depends on whom" |
-
-`agent-memory` solves these with a **bitemporal data model** and **hybrid retrieval**,
-borrowing battle-tested patterns from production Agent infrastructure:
-
-- **Bitemporal facts** — every memory carries `effective_at` (when it becomes true)
-  and `created_at` (when it was discovered), so you can ask "what is true now?"
-  *and* "what did we know at time T?"
-- **Conflict soft-deprecation** — when new knowledge contradicts old facts, the old
-  one is *softly deprecated* and linked to its replacement, keeping full auditability.
-- **Hybrid retrieval (BM25 + dense + RRF)** — sparse and dense channels are fused
-  with Reciprocal Rank Fusion, robust to wording gaps between question and memory.
-- **Entity graph** — entities and typed relations give you neighborhood and path
-  queries on top of the vector store.
-
-## Features
-
-- 🕑 **Bitemporal** facts: `effective_at` / `created_at`, timeline replay, "knowledge at T"
-- ⚖️ **Soft-deprecation**: contradictory facts don't get deleted, they get superseded
-- 🔎 **Hybrid retrieval**: BM25 (FTS5) + hashing-embedding dense + RRF fusion
-- 🕸️ **Entity graph**: typed relations, neighborhood & path traversal (networkx)
-- 🧩 **Pluggable embedder**: zero-dependency hashing embedder by default,
-  `sentence-transformers` optional
-- 🔌 **MCP server** included: let Claude/Cursor/OpenClaw remember across sessions
-- 🪶 **Zero-config**: SQLite persistence, no external services required
-
-## Quickstart
-
-```bash
-pip install agent-memory
-```
+`memstale` gives your AI agent a memory that **understands time**:
 
 ```python
-from agent_memory import AgentMemory
+from memstale import AgentMemory
 
 mem = AgentMemory("memory.db")
 
-# remember facts with entities
-mem.remember("The capital of France is Paris", entities=["France"], source="handbook")
+# 1. remember facts (optionally attach entities)
+mem.remember("The capital of France is Paris", entities=["France"])
 
-# query with hybrid retrieval
+# 2. hybrid retrieval — BM25 + dense + RRF fusion
 for hit in mem.query("what is the capital of France?", k=3):
     print(f"[{hit.score:.3f}] {hit.memory.content}")
 
-# a fact that only becomes true in the future is NOT retrieved today
-mem.remember(
-    "The capital of France is Lyon",
-    entities=["France"],
-    effective_at="2099-01-01T00:00:00+00:00",
-)
+# 3. a fact that only becomes true in 2099 is NEVER retrieved today
+mem.remember("The capital of France is Lyon",
+             entities=["France"],
+             effective_at="2099-01-01T00:00:00+00:00")
 
-# new knowledge soft-deprecates the old fact (nothing is hard-deleted)
+# 4. new knowledge soft-deprecates the old fact (nothing is hard-deleted)
 mem.remember("The capital of France is Paris (updated)", entities=["France"])
 ```
 
-### CLI
-
 ```bash
-# store
-agent-memory --db memory.db add "Sakya builds agent-memory" --entity Sakya --entity agent-memory
-
-# hybrid search
-agent-memory --db memory.db query "what does Sakya work on" -k 5
-
-# timeline replay
-agent-memory --db memory.db timeline --entity Sakya
-
-# entity graph neighborhood
-agent-memory --db memory.db graph --entity agent-memory
-
-# preview conflicts
-agent-memory --db memory.db conflicts "some new fact" --entity France
-
-# soft-delete
-agent-memory --db memory.db deprecate <memory-id>
+pip install memstale
 ```
 
-### As an MCP server (optional)
+## 🆚 Why not a plain vector store?
 
-```bash
-pip install agent-memory[mcp]
-python mcp_server.py --db memory.db
+Most "agent memory" libraries are **vector bags**: they answer *"what is
+semantically similar?"* but are blind to truth, time and relationships.
+
+| | Plain vector memory | `memstale` |
+|---|---|---|
+| 🕑 **Time** | No concept of validity — stale facts get retrieved forever | **Bitemporal**: `effective_at` + `created_at`. Future facts stay hidden until they're real |
+| ⚖️ **Conflicts** | Contradictory facts pile up; agent picks randomly | **Soft-deprecation**: new truth supersedes old, old stays auditable |
+| 🔎 **Retrieval** | Dense similarity only | **Hybrid**: BM25 (sparse) + dense vectors fused with **RRF** |
+| 🕸️ **Relations** | None — "who depends on whom?" is unanswerable | **Entity graph** with typed relations & path traversal |
+| ⚙️ **Ops** | Often needs a vector DB / API keys / model downloads | **Zero-config**: one SQLite file, built-in embedder, no external services |
+
+## 🎯 Core features
+
+| Feature | What you get |
+|---|---|
+| 🕑 **Bitemporal facts** | Every memory has `effective_at` (when it becomes true) and `created_at` (when it was discovered) |
+| ⚖️ **Conflict soft-deprecation** | Contradictory facts are marked `deprecated` + linked via `replaced_by`, never hard-deleted |
+| 🔎 **Hybrid retrieval** | FTS5 BM25 + hashing-embedding dense + **Reciprocal Rank Fusion** |
+| 🕸️ **Entity graph** | Typed relations, neighborhood & simple-path queries (networkx) |
+| 🧩 **Pluggable embedder** | Zero-dependency hashing embedder by default; `sentence-transformers` optional |
+| 🔌 **MCP server** | Let Claude / Cursor / OpenClaw remember across sessions (stdio) |
+| 🪶 **Zero-config** | SQLite persistence — no Neo4j, no Milvus, no API key required |
+
+## 🏗️ How it works
+
+### Architecture
+
+```mermaid
+flowchart TB
+    subgraph App["Agent Application"]
+        A[Python API] --> F
+        B[CLI] --> F
+        C[MCP Server] --> F
+    end
+    subgraph Core["memstale core"]
+        F[AgentMemory facade] --> S[store · SQLite + FTS5]
+        F --> T[timeline · bitemporal]
+        F --> CF[conflict · soft-deprecation]
+        F --> R[retriever · BM25 + dense + RRF]
+        F --> G[graph · entity relations]
+        F --> E[embedder · pluggable]
+    end
 ```
 
-Exposes `remember`, `query`, `timeline` tools over stdio so any MCP client can
-give your agent durable memory.
+### Conflict resolution flow
 
-## How it works
-
-```
-  Agent (API / CLI / MCP)
-          │
-   ┌──────▼──────┐
-   │ AgentMemory │  high-level facade
-   └──────┬──────┘
-   ┌──────▼───────────────────────────────────┐
-   │  store      SQLite + FTS5                │
-   │  timeline   bitemporal filtering/replay  │
-   │  conflict   soft-deprecation resolver    │
-   │  retriever  BM25 + dense + RRF           │
-   │  graph      entity relations (networkx)  │
-   │  embedder   hashing / sentence-transformers
-   └──────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Agent
+    participant Store
+    participant Judge as ConflictResolver
+    Agent->>Store: remember("Paris (updated)", entity=France)
+    Store->>Judge: find active memories sharing entities
+    Judge->>Judge: score = entity overlap × similarity × distance
+    alt score ≥ threshold (conflict)
+        Judge->>Store: deprecate(old) + replaced_by=new
+    else no conflict
+        Judge->>Store: keep both
+    end
+    Store-->>Agent: stored ✓
 ```
 
 ### Bitemporal model
 
 | field | meaning | answers |
 |-------|---------|---------|
-| `effective_at` | when the fact becomes true in the world | "what is true right now?" |
-| `created_at` | when the fact was discovered | "what did we know at T?" |
-| `deprecated` / `replaced_by` | soft-deletion link | "what superseded this?" |
+| `effective_at` | when the fact becomes true **in the world** | *"what is true right now?"* |
+| `created_at` | when the fact was **discovered / written** | *"what did we know at time T?"* |
+| `deprecated` / `replaced_by` | soft-deletion link to successor | *"what superseded this?"* |
 
-### Conflict resolution
+```mermaid
+timeline
+    title A capital fact's lifecycle
+    t1 (2026-01) discovered: "Paris is the capital" (created_at)
+    t2 (2026-02) takes effect: effective_at <= now → retrievable
+    t3 (2099-01) future fact: "Lyon is the capital" — hidden until 2099
+    t4 (2099-02) takes effect: Paris fact soft-deprecated
+```
 
-The default judge is a cheap heuristic (entity overlap × vector similarity ×
-lexical distance). Plug in an **LLM-as-a-judge** by passing a custom `judge`:
+## 🚀 Quickstart
+
+### Install
+
+```bash
+pip install memstale            # runtime
+pip install memstale[graph]     # + networkx (entity graph)
+pip install memstale[mcp]       # + MCP server
+```
+
+### CLI
+
+```bash
+# store a memory
+memstale --db memory.db add "Sakya builds memstale" --entity Sakya --entity memstale
+
+# hybrid search
+memstale --db memory.db query "what does Sakya work on" -k 5
+
+# timeline replay — how knowledge evolved
+memstale --db memory.db timeline --entity Sakya
+
+# entity graph neighborhood
+memstale --db memory.db graph --entity memstale
+
+# preview conflicts before writing
+memstale --db memory.db conflicts "some new fact" --entity France
+
+# soft-delete a memory
+memstale --db memory.db deprecate <memory-id>
+```
+
+### As an MCP server
+
+```bash
+pip install memstale[mcp]
+python mcp_server.py --db memory.db
+```
+
+Exposes `remember`, `query`, `timeline` tools over stdio — point any MCP
+client at it and your agent gains durable, time-aware memory.
+
+## 🧩 Custom embedding & judge
 
 ```python
+from memstale import AgentMemory
+
+mem = AgentMemory("memory.db", embedder=my_embedder)   # any .embed(text)->vec object
+
+# LLM-as-a-judge conflict detection (production pattern):
 mem.conflicts.judge = lambda new, old: llm_judge(new.content, old.content)
 ```
 
-Same "deterministic gate + LLM judgement" split used in production Agent
-orchestration — the pattern is identical to a fail-closed evaluator layer.
-
-## Project layout
+## 📦 Project layout
 
 ```
-agent-memory/
-├── agent_memory/
+memstale/
+├── memstale/
 │   ├── memory.py       # AgentMemory facade
 │   ├── models.py       # Memory / Entity / Relation / ScoredMemory
 │   ├── store.py        # SQLite + FTS5 persistence
@@ -170,13 +200,14 @@ agent-memory/
 └── tests/              # 17 unit tests (unittest, zero-dep)
 ```
 
-## Roadmap
+## 🗺️ Roadmap
 
-- [ ] Cross-backend abstraction for Neo4j / Milvus
-- [ ] LLM-as-a-judge conflict evaluator out of the box
+- [ ] Cross-backend abstraction: Neo4j / Milvus adapters
+- [ ] Built-in LLM-as-a-judge conflict evaluator
+- [ ] Demo GIF + interactive playground
 - [ ] Streaming timeline visualizer
-- [ ] `agent-memory[st]` embedder docs
+- [ ] `memstale[st]` sentence-transformers docs
 
-## License
+## 📄 License
 
 MIT © [Sakya](https://github.com/Sakyao)

@@ -1,8 +1,8 @@
-"""Optional MCP server exposing agent-memory to AI agents.
+"""Optional MCP server exposing memstale to AI agents.
 
 Run (requires the `mcp` extra)::
 
-    pip install agent-memory[mcp]
+    pip install memstale[mcp]
     python mcp_server.py --db memory.db
 
 Then point your MCP client (Claude, Cursor, OpenClaw, ...) at the stdio
@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import argparse
 
-from agent_memory import AgentMemory
+from memstale import AgentMemory
 
 
 def run(db_path: str = ":memory:") -> None:
@@ -26,10 +26,10 @@ def run(db_path: str = ":memory:") -> None:
         from mcp.server.fastmcp import FastMCP  # type: ignore
     except ImportError as exc:
         raise SystemExit(
-            "mcp package not installed. Run: pip install agent-memory[mcp]"
+            "mcp package not installed. Run: pip install memstale[mcp]"
         ) from exc
 
-    mcp = FastMCP("agent-memory")
+    mcp = FastMCP("memstale")
     mem = AgentMemory(db_path)
 
     @mcp.tool()
@@ -65,7 +65,7 @@ def run(db_path: str = ":memory:") -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="agent-memory MCP server")
+    parser = argparse.ArgumentParser(description="memstale MCP server")
     parser.add_argument("--db", default=":memory:", help="SQLite database path")
     args = parser.parse_args()
     run(args.db)

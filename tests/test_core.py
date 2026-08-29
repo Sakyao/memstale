@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from agent_memory import AgentMemory, Memory
+from memstale import AgentMemory, Memory
 
 
 class TestStoreCRUD(unittest.TestCase):
@@ -18,10 +18,10 @@ class TestStoreCRUD(unittest.TestCase):
         os.unlink(self.path)
 
     def test_remember_and_recall(self):
-        m = self.mem.remember("Sakya builds agent-memory", entities=["Sakya"])
+        m = self.mem.remember("Sakya builds memstale", entities=["Sakya"])
         got = self.mem.recall(m.id)
         self.assertIsNotNone(got)
-        self.assertEqual(got.content, "Sakya builds agent-memory")
+        self.assertEqual(got.content, "Sakya builds memstale")
         self.assertEqual(got.entity_ids, [m.entity_ids[0]])
 
     def test_remember_dedupes_entities(self):

@@ -101,7 +101,7 @@ class HashingEmbedder:
 class SentenceTransformerEmbedder:
     """Optional embedding backend backed by sentence-transformers.
 
-    Requires ``pip install agent-memory[st]``.
+    Requires ``pip install memstale[st]``.
     """
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
@@ -109,7 +109,7 @@ class SentenceTransformerEmbedder:
             from sentence_transformers import SentenceTransformer  # type: ignore
         except ImportError as exc:  # pragma: no cover
             raise RuntimeError(
-                "sentence-transformers is not installed. Run: pip install agent-memory[st]"
+                "sentence-transformers is not installed. Run: pip install memstale[st]"
             ) from exc
         self._model = SentenceTransformer(model_name)
 

@@ -2,7 +2,7 @@
 
 import unittest
 
-from agent_memory import AgentMemory, Relation
+from memstale import AgentMemory, Relation
 
 
 class TestRetrieval(unittest.TestCase):
@@ -37,13 +37,13 @@ class TestRetrieval(unittest.TestCase):
 class TestGraph(unittest.TestCase):
     def setUp(self):
         self.mem = AgentMemory()
-        self.mem.remember("Sakya develops agent-memory", entities=["Sakya", "agent-memory"])
-        self.mem.remember("agent-memory uses hybrid retrieval", entities=["agent-memory", "retrieval"])
-        self.mem.add_relation("Sakya", "agent-memory", "develops")
-        self.mem.add_relation("agent-memory", "retrieval", "uses")
+        self.mem.remember("Sakya develops memstale", entities=["Sakya", "memstale"])
+        self.mem.remember("memstale uses hybrid retrieval", entities=["memstale", "retrieval"])
+        self.mem.add_relation("Sakya", "memstale", "develops")
+        self.mem.add_relation("memstale", "retrieval", "uses")
 
     def test_neighbors(self):
-        neighbors = self.mem.neighbors("agent-memory")
+        neighbors = self.mem.neighbors("memstale")
         names = {n.name for n in neighbors}
         self.assertIn("Sakya", names)
         self.assertIn("retrieval", names)

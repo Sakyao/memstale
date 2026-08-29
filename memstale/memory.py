@@ -2,11 +2,11 @@
 
 Typical usage::
 
-    from agent_memory import AgentMemory
+    from memstale import AgentMemory
 
     mem = AgentMemory("memory.db")
-    mem.remember("Sakya builds agent-memory", entities=["Sakya", "agent-memory"])
-    mem.remember("agent-memory is a temporal memory library", entities=["agent-memory"])
+    mem.remember("Sakya builds memstale", entities=["Sakya", "memstale"])
+    mem.remember("memstale is a temporal memory library", entities=["memstale"])
     results = mem.query("what does Sakya work on?")
 """
 

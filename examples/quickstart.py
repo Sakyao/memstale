@@ -8,7 +8,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agent_memory import AgentMemory
+from memstale import AgentMemory
 
 mem = AgentMemory("quickstart.db")
 

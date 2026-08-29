@@ -1,4 +1,4 @@
-"""agent-memory: temporal-aware long-term memory for AI agents.
+"""memstale: temporal-aware long-term memory for AI agents.
 
 Hybrid vector + graph memory with:
 - bitemporal facts (effective_at / created_at)

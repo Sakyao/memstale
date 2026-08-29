@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agent-memory"
+name = "memstale"
 version = "0.1.0"
 description = "Temporal-aware long-term memory for AI agents: vector + graph hybrid retrieval with bitemporal facts and conflict soft-deprecation."
 readme = "README.md"
@@ -28,7 +28,7 @@ mcp = ["mcp>=1.0"]
 dev = ["pytest>=7.0"]
 
 [project.scripts]
-agent-memory = "agent_memory.cli:main"
+memstale = "memstale.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["agent_memory*"]
+include = ["memstale*"]
