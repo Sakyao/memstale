@@ -1,0 +1,155 @@
+{
+  "suite": "negation",
+  "description": "12 facts that get explicitly dropped/retired/killed rather than replaced with a new value. Probes ask about current state; a stale answer means the memory kept treating the retired thing as active.",
+  "sessions": [
+    {
+      "session_id": 1,
+      "timestamp": "2026-01-06T10:00:00",
+      "writes": [
+        {"text": "Our cache layer is Redis.", "meta": {"topic": "cache"}},
+        {"text": "We hold a Friday standup every week.", "meta": {"topic": "standup"}},
+        {"text": "We officially support IE11 for enterprise customers.", "meta": {"topic": "browser_support"}},
+        {"text": "External partners integrate against the v1 API.", "meta": {"topic": "api_version"}},
+        {"text": "Ops uses the legacy dashboard for incident triage.", "meta": {"topic": "dashboard"}},
+        {"text": "The dark mode feature flag is enabled for all users.", "meta": {"topic": "dark_mode_flag"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 2,
+      "timestamp": "2026-01-13T10:00:00",
+      "writes": [
+        {"text": "The team hangs out in the #random-old Slack channel.", "meta": {"topic": "slack_channel"}},
+        {"text": "On-call carries a physical pager.", "meta": {"topic": "pager"}},
+        {"text": "The team tracks tickets in Jira.", "meta": {"topic": "ticket_tracker"}},
+        {"text": "We're subscribed to the vendor's monthly newsletter.", "meta": {"topic": "newsletter"}},
+        {"text": "The product offers a free tier for individuals.", "meta": {"topic": "free_tier"}},
+        {"text": "We have a satellite office in Austin.", "meta": {"topic": "austin_office"}},
+        {"text": "Quiet week, mostly code review and backlog grooming.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 3,
+      "timestamp": "2026-02-03T10:00:00",
+      "writes": [
+        {"text": "We dropped the Redis cache last quarter; reads now hit Postgres directly, no separate cache layer.", "meta": {"topic": "cache"}},
+        {"text": "We cancelled the Friday standup; the team only does Monday and Wednesday syncs now.", "meta": {"topic": "standup"}},
+        {"text": "Onboarded a new support rep this week.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 4,
+      "timestamp": "2026-02-17T10:00:00",
+      "writes": [
+        {"text": "We dropped IE11 support entirely - the app requires an evergreen browser now.", "meta": {"topic": "browser_support"}},
+        {"text": "The v1 API is deprecated and shut off; partners must use v2.", "meta": {"topic": "api_version"}},
+        {"text": "Spent the afternoon triaging a batch of stale GitHub issues.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 5,
+      "timestamp": "2026-03-10T10:00:00",
+      "writes": [
+        {"text": "The legacy dashboard was sunset; incident triage moved to the new Grafana board.", "meta": {"topic": "dashboard"}},
+        {"text": "We turned off the dark mode feature flag after a contrast bug; it's disabled for everyone now.", "meta": {"topic": "dark_mode_flag"}},
+        {"text": "We archived #random-old; casual chat moved to #watercooler.", "meta": {"topic": "slack_channel"}},
+        {"text": "Deployed a small fix to the invoice PDF renderer.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 6,
+      "timestamp": "2026-03-24T10:00:00",
+      "writes": [
+        {"text": "We retired the physical pager; on-call alerts go through PagerDuty on our phones now.", "meta": {"topic": "pager"}},
+        {"text": "We stopped using Jira for ticket tracking; everything moved to Linear.", "meta": {"topic": "ticket_tracker"}},
+        {"text": "We unsubscribed from the vendor newsletter after the pricing spam.", "meta": {"topic": "newsletter"}},
+        {"text": "We killed the free tier; every account now requires a paid plan.", "meta": {"topic": "free_tier"}},
+        {"text": "We closed the Austin office; the whole team is remote now.", "meta": {"topic": "austin_office"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 7,
+      "timestamp": "2026-04-07T10:00:00",
+      "writes": [],
+      "probes": [
+        {
+          "id": "negation-01",
+          "question": "Do we still use Redis as our cache layer?",
+          "expected": ["dropped the Redis cache", "no separate cache layer"],
+          "must_not_contain": ["cache layer is Redis"]
+        },
+        {
+          "id": "negation-02",
+          "question": "Is there a Friday standup?",
+          "expected": ["cancelled the Friday standup", "Monday and Wednesday syncs"],
+          "must_not_contain": ["hold a Friday standup every week"]
+        },
+        {
+          "id": "negation-03",
+          "question": "Do we support IE11?",
+          "expected": ["dropped IE11 support", "evergreen browser"],
+          "must_not_contain": ["officially support IE11"]
+        },
+        {
+          "id": "negation-04",
+          "question": "Which API version should partners integrate against?",
+          "expected": ["must use v2", "v1 API is deprecated"],
+          "must_not_contain": ["partners integrate against the v1 API"]
+        },
+        {
+          "id": "negation-05",
+          "question": "What does ops use for incident triage?",
+          "expected": ["Grafana board", "legacy dashboard was sunset"],
+          "must_not_contain": ["uses the legacy dashboard for incident triage"]
+        },
+        {
+          "id": "negation-06",
+          "question": "Is the dark mode feature flag still on?",
+          "expected": ["turned off the dark mode feature flag", "disabled for everyone"],
+          "must_not_contain": ["feature flag is enabled for all users"]
+        },
+        {
+          "id": "negation-07",
+          "question": "Where does the team chat casually on Slack?",
+          "expected": ["#watercooler", "archived #random-old"],
+          "must_not_contain": ["hangs out in the #random-old Slack channel"]
+        },
+        {
+          "id": "negation-08",
+          "question": "Does on-call still carry a physical pager?",
+          "expected": ["retired the physical pager", "PagerDuty"],
+          "must_not_contain": ["on-call carries a physical pager"]
+        },
+        {
+          "id": "negation-09",
+          "question": "What tool does the team use to track tickets?",
+          "expected": ["moved to Linear", "stopped using Jira"],
+          "must_not_contain": ["tracks tickets in Jira"]
+        },
+        {
+          "id": "negation-10",
+          "question": "Are we still subscribed to the vendor newsletter?",
+          "expected": ["unsubscribed from the vendor newsletter"],
+          "must_not_contain": ["subscribed to the vendor's monthly newsletter"]
+        },
+        {
+          "id": "negation-11",
+          "question": "Does the product still have a free tier?",
+          "expected": ["killed the free tier", "requires a paid plan"],
+          "must_not_contain": ["offers a free tier for individuals"]
+        },
+        {
+          "id": "negation-12",
+          "question": "Do we still have an office in Austin?",
+          "expected": ["closed the Austin office", "team is remote now"],
+          "must_not_contain": ["satellite office in Austin"]
+        }
+      ]
+    }
+  ]
+}

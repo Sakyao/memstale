@@ -1,0 +1,168 @@
+{
+  "suite": "supersession",
+  "description": "12 facts stated once, then explicitly overturned 1-4 sessions later. Probes at the end ask the current value; a stale answer means the memory served the retired fact as if it were still true.",
+  "sessions": [
+    {
+      "session_id": 1,
+      "timestamp": "2026-01-05T09:00:00",
+      "writes": [
+        {"text": "I indent all my code with tabs.", "meta": {"topic": "indentation"}},
+        {"text": "My editor of choice is Vim.", "meta": {"topic": "editor"}},
+        {"text": "The main datastore is Postgres.", "meta": {"topic": "database"}},
+        {"text": "We deploy the app to Heroku.", "meta": {"topic": "deploy_target"}},
+        {"text": "I'm based in Pacific time, PST.", "meta": {"topic": "timezone"}},
+        {"text": "Alice is my team lead.", "meta": {"topic": "team_lead"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 2,
+      "timestamp": "2026-01-12T09:00:00",
+      "writes": [
+        {"text": "The billing service is written in Python.", "meta": {"topic": "billing_lang"}},
+        {"text": "CI runs on Travis.", "meta": {"topic": "ci_provider"}},
+        {"text": "My go-to coffee order is a latte.", "meta": {"topic": "coffee"}},
+        {"text": "I work 9 to 5.", "meta": {"topic": "work_hours"}},
+        {"text": "The monorepo is managed with Lerna.", "meta": {"topic": "monorepo_tool"}},
+        {"text": "On-call rotations are one week long.", "meta": {"topic": "oncall_length"}},
+        {"text": "Grabbed pho for lunch with the team today.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 3,
+      "timestamp": "2026-02-02T09:00:00",
+      "writes": [
+        {"text": "Switched off tabs completely - everything is spaces now, two-space width.", "meta": {"topic": "indentation"}},
+        {"text": "I moved off Vim entirely and now write everything in Neovim with LSP.", "meta": {"topic": "editor"}},
+        {"text": "Fixed a flaky test in the payments suite.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 4,
+      "timestamp": "2026-02-16T09:00:00",
+      "writes": [
+        {"text": "We migrated the main datastore off Postgres onto CockroachDB for multi-region writes.", "meta": {"topic": "database"}},
+        {"text": "We cut over deploys from Heroku to Fly.io last sprint.", "meta": {"topic": "deploy_target"}},
+        {"text": "Reviewed a PR from the new hire on the search team.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 5,
+      "timestamp": "2026-03-09T09:00:00",
+      "writes": [
+        {"text": "After relocating, I now work out of Eastern time, EST.", "meta": {"topic": "timezone"}},
+        {"text": "Alice moved to another org; Priya is my team lead now.", "meta": {"topic": "team_lead"}},
+        {"text": "We rewrote the billing service from Python into Rust for latency.", "meta": {"topic": "billing_lang"}},
+        {"text": "We ripped out Travis and CI now runs entirely on GitHub Actions.", "meta": {"topic": "ci_provider"}},
+        {"text": "Standup ran long because of the incident retro.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 6,
+      "timestamp": "2026-03-23T09:00:00",
+      "writes": [
+        {"text": "I switched my go-to order to a flat white.", "meta": {"topic": "coffee"}},
+        {"text": "I shifted my schedule to 7 to 3 to beat traffic.", "meta": {"topic": "work_hours"}},
+        {"text": "We swapped Lerna out for Turborepo across the monorepo.", "meta": {"topic": "monorepo_tool"}},
+        {"text": "On-call rotations got extended to two weeks.", "meta": {"topic": "oncall_length"}},
+        {"text": "Merged the docs cleanup PR, nothing exciting.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 7,
+      "timestamp": "2026-04-06T09:00:00",
+      "writes": [],
+      "probes": [
+        {
+          "id": "supersession-01",
+          "question": "What indentation style do I use?",
+          "expected": ["spaces now", "two-space"],
+          "must_not_contain": ["indent all my code with tabs"],
+          "supersedes": "indent all my code with tabs"
+        },
+        {
+          "id": "supersession-02",
+          "question": "What editor do I use?",
+          "expected": ["Neovim", "moved off Vim"],
+          "must_not_contain": ["editor of choice is Vim"],
+          "supersedes": "editor of choice is Vim"
+        },
+        {
+          "id": "supersession-03",
+          "question": "What is the main datastore?",
+          "expected": ["CockroachDB", "migrated"],
+          "must_not_contain": ["main datastore is Postgres"],
+          "supersedes": "main datastore is Postgres"
+        },
+        {
+          "id": "supersession-04",
+          "question": "Where do we deploy the app?",
+          "expected": ["Fly.io", "cut over"],
+          "must_not_contain": ["deploy the app to Heroku"],
+          "supersedes": "deploy the app to Heroku"
+        },
+        {
+          "id": "supersession-05",
+          "question": "What timezone am I in?",
+          "expected": ["Eastern time", "EST"],
+          "must_not_contain": ["based in Pacific time"],
+          "supersedes": "based in Pacific time"
+        },
+        {
+          "id": "supersession-06",
+          "question": "Who is my team lead?",
+          "expected": ["Priya is my team lead", "Priya"],
+          "must_not_contain": ["Alice is my team lead"],
+          "supersedes": "Alice is my team lead"
+        },
+        {
+          "id": "supersession-07",
+          "question": "What language is the billing service written in?",
+          "expected": ["Rust", "rewrote the billing service"],
+          "must_not_contain": ["billing service is written in Python"],
+          "supersedes": "billing service is written in Python"
+        },
+        {
+          "id": "supersession-08",
+          "question": "What does CI run on?",
+          "expected": ["GitHub Actions", "ripped out Travis"],
+          "must_not_contain": ["CI runs on Travis"],
+          "supersedes": "CI runs on Travis"
+        },
+        {
+          "id": "supersession-09",
+          "question": "What is my go-to coffee order?",
+          "expected": ["flat white"],
+          "must_not_contain": ["go-to coffee order is a latte"],
+          "supersedes": "go-to coffee order is a latte"
+        },
+        {
+          "id": "supersession-10",
+          "question": "What hours do I work?",
+          "expected": ["7 to 3", "shifted my schedule"],
+          "must_not_contain": ["I work 9 to 5"],
+          "supersedes": "I work 9 to 5"
+        },
+        {
+          "id": "supersession-11",
+          "question": "What tool manages the monorepo?",
+          "expected": ["Turborepo", "swapped Lerna out"],
+          "must_not_contain": ["monorepo is managed with Lerna"],
+          "supersedes": "monorepo is managed with Lerna"
+        },
+        {
+          "id": "supersession-12",
+          "question": "How long are on-call rotations?",
+          "expected": ["two weeks", "extended"],
+          "must_not_contain": ["rotations are one week long"],
+          "supersedes": "rotations are one week long"
+        }
+      ]
+    }
+  ]
+}

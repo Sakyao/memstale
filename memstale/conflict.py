@@ -98,15 +98,27 @@ class ConflictResolver:
         for existing in candidates:
             if not is_effective(existing):
                 continue
-            # Only compare memories touching at least one shared entity to keep
-            # the default judge cheap and precise.
-            if not (set(existing.entity_ids) & set(new_memory.entity_ids)):
+            # Candidate gate: shared entity OR topic-token overlap. The topic
+            # fallback lets the resolver work even when writes carry no entity
+            # labels (e.g. raw session streams from a benchmark).
+            if not self._related(new_memory, existing):
                 continue
             score = self.judge(new_memory, existing)
             if score >= self.threshold:
                 conflicts.append(Conflict(new_memory, existing, score))
         conflicts.sort(key=lambda c: c.score, reverse=True)
         return conflicts
+
+    @staticmethod
+    def _related(a: Memory, b: Memory) -> bool:
+        """Cheap topic gate: shared entities, or content-token Jaccard >= 0.25."""
+        if set(a.entity_ids) & set(b.entity_ids):
+            return True
+        ta, tb = _content_tokens(a.content), _content_tokens(b.content)
+        union = ta | tb
+        if not union:
+            return False
+        return len(ta & tb) / len(union) >= 0.25
 
     def resolve(self, new_memory: Memory) -> list[Conflict]:
         """Deprecate conflicting memories, linking them to ``new_memory``."""

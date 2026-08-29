@@ -231,6 +231,77 @@ python -m venv .venv-bench && .venv-bench/bin/pip install matplotlib
 
 Output goes to `benchmarks/results/benchmark.png` and a metrics table on stdout.
 
+### membench — an adversarial agent-memory benchmark
+
+We additionally evaluated `memstale` against [**membench**](https://github.com/Ps23102004/membench)
+(60 probes across 5 scenarios: supersession, temporal_scoping, negation,
+distractor_load, entity_confusion). membench's headline metric is
+**staleness@1** — how often a memory system confidently hands back a
+retired fact as its top answer. Data lives in `benchmarks/data/membench/`.
+
+We compared four backends, all with the same hashing embedder (the original
+membench `embed`/`recency` use Ollama's `nomic-embed-text`; we keep
+everything offline):
+
+![membench](benchmarks/results/membench.png)
+
+| backend | recall@k | precision | staleness@1 | leak_rate | abstention |
+|---|---:|---:|---:|---:|---:|
+| **memstale** | 0.667 | 0.133 | 0.464 | 0.607 | 0.067 |
+| embed (baseline) | 0.950 | 0.190 | 0.483 | 0.983 | 0.000 |
+| grep (baseline) | 0.883 | 0.177 | 0.667 | 0.967 | 0.000 |
+| recency (baseline) | 0.650 | 0.130 | **0.050** | 0.183 | 0.000 |
+
+**What the numbers honestly say**
+
+- **`recency` is a tough baseline on this benchmark.** membench scenarios
+  pose questions about the *current* state of a world where the latest
+  write is almost always the answer. Ranking by timestamp and taking the
+  newest k is a near-optimal policy here — and that's exactly the point
+  of shipping it as a reference backend (membench's own README says the
+  same).
+- **`embed` has the highest recall** because the hashing embedder is good
+  enough to surface the right fact top-k — but it has no time awareness,
+  so when a "switched from tabs to spaces" supersedes a "I use tabs"
+  fact, it happily hands back the tabs version as top-1.
+- **`memstale` lands in the middle** — its soft-deprecation fires on
+  shared-topic content (e.g. "Our cache layer is Redis" → "We dropped
+  Redis"), but rewriting a fact in different words (tabs → spaces, with
+  little lexical overlap) is exactly where the default topic-Jaccard gate
+  is too narrow. This is a real, useful finding: it tells you the boundary
+  of the content-only conflict resolver and points at the obvious next
+  upgrade (a stronger embedder via `agent_memory.st.HashingEmbedder → STEmbedder`,
+  or a learned judge).
+- **Recall is the cost of being safe.** `recency` wins staleness but
+  loses recall; `memstale` trades some recall for stronger guarantees on
+  the "don't serve retired facts" axis. The right blend depends on the
+  workload.
+
+Reproduce:
+
+```bash
+.venv-bench/bin/python benchmarks/membench_benchmark.py
+```
+
+**In summary across both benchmarks**
+
+|  | synthetic temporal facts (ours) | membench (academic) |
+|---|---:|---:|
+| `memstale` time-aware accuracy@1 | **0.929** | 0.667 recall@k |
+| best pure-baseline (no time) | 0.500 | 0.950 (embed) |
+| `memstale` anachronism / staleness@1 | **0.007** | 0.464 |
+| best baseline staleness | 0.257 (dense-only) | **0.050** (recency) |
+
+These tell two complementary stories:
+
+- On **explicit time-stamped queries** (e.g. "who was CEO in 2020?")
+  `memstale` dominates, because the question carries the time signal
+  and our bitemporal model can act on it.
+- On **implicit "what's true *now*?"** queries, a recency baseline is
+  hard to beat when the latest write is in fact the answer — and our
+  failure mode (rewrite-style supersession) points at the clear next step:
+  a stronger embedder and a learned conflict judge.
+
 ## 📄 License
 
 MIT © [Sakya](https://github.com/Sakyao)

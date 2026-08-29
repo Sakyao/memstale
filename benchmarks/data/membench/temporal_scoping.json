@@ -1,0 +1,140 @@
+{
+  "suite": "temporal_scoping",
+  "description": "12 facts explicitly scoped to a window ('while I was at X', 'during the freeze') that later closes. Probes ask about the current state after the window ends; a stale answer means the memory kept treating the time-boxed fact as still true.",
+  "sessions": [
+    {
+      "session_id": 1,
+      "timestamp": "2026-01-07T09:00:00",
+      "writes": [
+        {"text": "While I worked at Meridian Corp, my manager was Tom Reyes.", "meta": {"topic": "manager"}},
+        {"text": "During the two-week standing-desk trial in March, I worked standing all day.", "meta": {"topic": "desk"}},
+        {"text": "During the December code freeze, no PRs were merged to main.", "meta": {"topic": "freeze"}},
+        {"text": "For the duration of ReactConf, I had an all-access speaker badge.", "meta": {"topic": "badge"}},
+        {"text": "While debugging the outage, I used a temporary admin API key.", "meta": {"topic": "api_key"}},
+        {"text": "While my car was in the shop, I drove a rental.", "meta": {"topic": "car"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 2,
+      "timestamp": "2026-01-14T09:00:00",
+      "writes": [
+        {"text": "While I was on parental leave, Marcus covered my on-call shifts.", "meta": {"topic": "oncall_cover"}},
+        {"text": "During the closed beta, the new editor was gated behind a feature flag only I could see.", "meta": {"topic": "editor_flag"}},
+        {"text": "For the Q1 crunch, we brought on a contractor, Ravi, to help with mobile.", "meta": {"topic": "contractor"}},
+        {"text": "During the migration, the old domain temporarily redirected to a maintenance page.", "meta": {"topic": "domain_redirect"}},
+        {"text": "During the summer trial, standup moved to 9am.", "meta": {"topic": "standup_time"}},
+        {"text": "During the office renovation, I hot-desked wherever was free.", "meta": {"topic": "desk_assignment"}},
+        {"text": "Cleared out a backlog of stale notifications today.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 3,
+      "timestamp": "2026-02-04T09:00:00",
+      "writes": [
+        {"text": "Since joining Northwind, my manager is Dana Okafor.", "meta": {"topic": "manager"}},
+        {"text": "The trial ended; I went back to sitting at a regular desk.", "meta": {"topic": "desk"}},
+        {"text": "The freeze lifted in January; PRs merge to main normally again.", "meta": {"topic": "freeze"}},
+        {"text": "ReactConf ended; my badge access expired with the conference.", "meta": {"topic": "badge"}},
+        {"text": "The incident closed and the temporary admin API key was revoked.", "meta": {"topic": "api_key"}},
+        {"text": "Got my car back from the shop; back to driving my own car.", "meta": {"topic": "car"}},
+        {"text": "Wrote up the postmortem for last week's outage.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 4,
+      "timestamp": "2026-02-18T09:00:00",
+      "writes": [
+        {"text": "I'm back from leave and covering my own on-call shifts again.", "meta": {"topic": "oncall_cover"}},
+        {"text": "The new editor went GA; the feature flag was removed and everyone has it now.", "meta": {"topic": "editor_flag"}},
+        {"text": "Q1 ended and Ravi's contract wrapped; mobile is back to just the core team.", "meta": {"topic": "contractor"}},
+        {"text": "Migration finished; the old domain now redirects straight to the new app, not a maintenance page.", "meta": {"topic": "domain_redirect"}},
+        {"text": "The summer trial ended; standup is back to its usual 10am slot.", "meta": {"topic": "standup_time"}},
+        {"text": "The renovation finished; I have my own assigned desk again, desk 14.", "meta": {"topic": "desk_assignment"}},
+        {"text": "Updated the onboarding doc with the new repo layout.", "meta": {"topic": "noise"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 5,
+      "timestamp": "2026-03-04T09:00:00",
+      "writes": [],
+      "probes": [
+        {
+          "id": "temporal-01",
+          "question": "Who is my manager?",
+          "expected": ["manager is Dana Okafor"],
+          "must_not_contain": ["manager was Tom Reyes"]
+        },
+        {
+          "id": "temporal-02",
+          "question": "Am I working standing or sitting right now?",
+          "expected": ["back to sitting", "regular desk"],
+          "must_not_contain": ["worked standing all day"]
+        },
+        {
+          "id": "temporal-03",
+          "question": "Are PRs currently being merged to main?",
+          "expected": ["merge to main normally again", "freeze lifted"],
+          "must_not_contain": ["no PRs were merged to main"]
+        },
+        {
+          "id": "temporal-04",
+          "question": "Do I currently have speaker badge access?",
+          "expected": ["badge access expired"],
+          "must_not_contain": ["all-access speaker badge"]
+        },
+        {
+          "id": "temporal-05",
+          "question": "Do I have an admin API key right now?",
+          "expected": ["temporary admin API key was revoked"],
+          "must_not_contain": ["I used a temporary admin API key"]
+        },
+        {
+          "id": "temporal-06",
+          "question": "What car am I driving currently?",
+          "expected": ["driving my own car", "got my car back"],
+          "must_not_contain": ["drove a rental"]
+        },
+        {
+          "id": "temporal-07",
+          "question": "Who covers my on-call shifts these days?",
+          "expected": ["covering my own on-call shifts", "back from leave"],
+          "must_not_contain": ["Marcus covered my on-call shifts"]
+        },
+        {
+          "id": "temporal-08",
+          "question": "Is the new editor still behind a feature flag?",
+          "expected": ["feature flag was removed", "everyone has it now"],
+          "must_not_contain": ["gated behind a feature flag only I could see"]
+        },
+        {
+          "id": "temporal-09",
+          "question": "Is Ravi still working on mobile?",
+          "expected": ["contract wrapped", "back to just the core team"],
+          "must_not_contain": ["brought on a contractor, Ravi"]
+        },
+        {
+          "id": "temporal-10",
+          "question": "Where does the old domain redirect to now?",
+          "expected": ["redirects straight to the new app"],
+          "must_not_contain": ["redirected to a maintenance page"]
+        },
+        {
+          "id": "temporal-11",
+          "question": "What time is standup?",
+          "expected": ["back to its usual 10am slot"],
+          "must_not_contain": ["standup moved to 9am"]
+        },
+        {
+          "id": "temporal-12",
+          "question": "Do I have my own assigned desk?",
+          "expected": ["assigned desk again, desk 14"],
+          "must_not_contain": ["hot-desked wherever was free"]
+        }
+      ]
+    }
+  ]
+}

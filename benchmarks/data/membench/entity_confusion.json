@@ -1,0 +1,118 @@
+{
+  "suite": "entity_confusion",
+  "description": "6 pairs of deliberately similarly-named entities (people, projects, clients, repos, channels, conferences), each pair sharing a name stem but holding different facts. Probes ask about one specific entity; a contaminated answer means the memory blended in the other entity's fact.",
+  "sessions": [
+    {
+      "session_id": 1,
+      "timestamp": "2026-01-08T09:00:00",
+      "writes": [
+        {"text": "Project Atlas is the internal analytics pipeline, owned by the data team.", "meta": {"entity": "Project Atlas"}},
+        {"text": "Project Atlas Prime is the customer-facing recommendation engine, owned by the ML team.", "meta": {"entity": "Project Atlas Prime"}},
+        {"text": "Devon Ashworth is our frontend lead, based in Toronto.", "meta": {"entity": "Devon Ashworth"}},
+        {"text": "Devin Ashford is our security lead, based in Denver.", "meta": {"entity": "Devin Ashford"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 2,
+      "timestamp": "2026-01-19T09:00:00",
+      "writes": [
+        {"text": "Meridian Health is on the Enterprise plan and pays annually.", "meta": {"entity": "Meridian Health"}},
+        {"text": "Meridian Logistics is on the Starter plan and pays monthly.", "meta": {"entity": "Meridian Logistics"}},
+        {"text": "payments-core handles ledger reconciliation and is written in Go.", "meta": {"entity": "payments-core"}},
+        {"text": "payments-connect handles third-party gateway integrations and is written in TypeScript.", "meta": {"entity": "payments-connect"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 3,
+      "timestamp": "2026-02-02T09:00:00",
+      "writes": [
+        {"text": "#incidents is the live channel monitored by on-call 24/7.", "meta": {"entity": "#incidents"}},
+        {"text": "#incidents-archive is a read-only archive nobody monitors.", "meta": {"entity": "#incidents-archive"}},
+        {"text": "StrangeLoop happens in St. Louis every September.", "meta": {"entity": "StrangeLoop"}},
+        {"text": "StrangeLoop EU happens in Berlin every March.", "meta": {"entity": "StrangeLoop EU"}}
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 4,
+      "timestamp": "2026-02-16T09:00:00",
+      "writes": [],
+      "probes": [
+        {
+          "id": "entity-01",
+          "question": "Who owns Project Atlas?",
+          "expected": ["owned by the data team"],
+          "must_not_contain": ["owned by the ML team"]
+        },
+        {
+          "id": "entity-02",
+          "question": "Who owns Project Atlas Prime?",
+          "expected": ["owned by the ML team"],
+          "must_not_contain": ["owned by the data team"]
+        },
+        {
+          "id": "entity-03",
+          "question": "Where is Devon Ashworth based?",
+          "expected": ["based in Toronto"],
+          "must_not_contain": ["based in Denver"]
+        },
+        {
+          "id": "entity-04",
+          "question": "Where is Devin Ashford based?",
+          "expected": ["based in Denver"],
+          "must_not_contain": ["based in Toronto"]
+        },
+        {
+          "id": "entity-05",
+          "question": "What plan is Meridian Health on?",
+          "expected": ["Enterprise plan"],
+          "must_not_contain": ["Starter plan"]
+        },
+        {
+          "id": "entity-06",
+          "question": "What plan is Meridian Logistics on?",
+          "expected": ["Starter plan"],
+          "must_not_contain": ["Enterprise plan"]
+        },
+        {
+          "id": "entity-07",
+          "question": "What language is payments-core written in?",
+          "expected": ["written in Go"],
+          "must_not_contain": ["written in TypeScript"]
+        },
+        {
+          "id": "entity-08",
+          "question": "What language is payments-connect written in?",
+          "expected": ["written in TypeScript"],
+          "must_not_contain": ["written in Go"]
+        },
+        {
+          "id": "entity-09",
+          "question": "Is #incidents monitored?",
+          "expected": ["monitored by on-call 24/7"],
+          "must_not_contain": ["read-only archive nobody monitors"]
+        },
+        {
+          "id": "entity-10",
+          "question": "Is #incidents-archive monitored?",
+          "expected": ["read-only archive nobody monitors"],
+          "must_not_contain": ["monitored by on-call 24/7"]
+        },
+        {
+          "id": "entity-11",
+          "question": "Where does StrangeLoop happen?",
+          "expected": ["St. Louis"],
+          "must_not_contain": ["happens in Berlin"]
+        },
+        {
+          "id": "entity-12",
+          "question": "Where does StrangeLoop EU happen?",
+          "expected": ["Berlin"],
+          "must_not_contain": ["happens in St. Louis"]
+        }
+      ]
+    }
+  ]
+}

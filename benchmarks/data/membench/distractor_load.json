@@ -1,0 +1,459 @@
+{
+  "suite": "distractor_load",
+  "description": "12 target service/port facts buried among 12 confusable near-duplicate siblings and 28 unrelated filler facts sharing the exact same sentence template - 52 facts total. Probes ask for one service's port; a stale/wrong answer means the memory surfaced a same-shaped-but-wrong fact instead of the exact target.",
+  "sessions": [
+    {
+      "session_id": 1,
+      "timestamp": "2026-01-10T09:00:00",
+      "writes": [
+        {
+          "text": "notif-dispatch-retry runs on port 5051 in production.",
+          "meta": {
+            "topic": "notif-dispatch_sibling"
+          }
+        },
+        {
+          "text": "feature-flags-staging runs on port 6601 in production.",
+          "meta": {
+            "topic": "feature-flags_sibling"
+          }
+        },
+        {
+          "text": "pricing-engine runs on port 5501 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "auth-gateway-internal runs on port 9002 in production.",
+          "meta": {
+            "topic": "auth-gateway_sibling"
+          }
+        },
+        {
+          "text": "audit-logger-cold runs on port 7701 in production.",
+          "meta": {
+            "topic": "audit-logger_sibling"
+          }
+        },
+        {
+          "text": "kyc-checker runs on port 5514 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "rate-limiter runs on port 9900 in production.",
+          "meta": {
+            "topic": "rate-limiter_target"
+          }
+        },
+        {
+          "text": "geo-locator runs on port 5515 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "webhook-relay-eu runs on port 8801 in production.",
+          "meta": {
+            "topic": "webhook-relay_sibling"
+          }
+        },
+        {
+          "text": "image-resizer-legacy runs on port 4401 in production.",
+          "meta": {
+            "topic": "image-resizer_sibling"
+          }
+        },
+        {
+          "text": "dispute-resolver runs on port 5522 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "inventory-sync runs on port 5500 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "subscription-mgr runs on port 5509 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "refund-worker runs on port 5505 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "loyalty-points runs on port 5507 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "export-compliance runs on port 5519 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "billing-sync runs on port 7001 in production.",
+          "meta": {
+            "topic": "billing-sync_target"
+          }
+        },
+        {
+          "text": "tax-engine runs on port 5504 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "image-resizer runs on port 4400 in production.",
+          "meta": {
+            "topic": "image-resizer_target"
+          }
+        },
+        {
+          "text": "catalog-api runs on port 5502 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "currency-fx runs on port 5512 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "checkout-api runs on port 8443 in production.",
+          "meta": {
+            "topic": "checkout-api_target"
+          }
+        },
+        {
+          "text": "sanctions-screener runs on port 5520 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "webhook-relay runs on port 8800 in production.",
+          "meta": {
+            "topic": "webhook-relay_target"
+          }
+        },
+        {
+          "text": "vat-calculator runs on port 5518 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "settlement-batcher runs on port 5526 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 2,
+      "timestamp": "2026-01-10T09:05:00",
+      "writes": [
+        {
+          "text": "receipt-mailer runs on port 5511 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "ledger-writer runs on port 5524 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "coupon-service runs on port 5506 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "audit-logger runs on port 7700 in production.",
+          "meta": {
+            "topic": "audit-logger_target"
+          }
+        },
+        {
+          "text": "feature-flags runs on port 6600 in production.",
+          "meta": {
+            "topic": "feature-flags_target"
+          }
+        },
+        {
+          "text": "media-uploader runs on port 3300 in production.",
+          "meta": {
+            "topic": "media-uploader_target"
+          }
+        },
+        {
+          "text": "treasury-sync runs on port 5527 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "gift-cards runs on port 5508 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "chargeback-handler runs on port 5521 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "media-uploader-canary runs on port 3301 in production.",
+          "meta": {
+            "topic": "media-uploader_sibling"
+          }
+        },
+        {
+          "text": "tax-id-lookup runs on port 5517 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "reconciliation-job runs on port 5525 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "auth-gateway runs on port 9001 in production.",
+          "meta": {
+            "topic": "auth-gateway_target"
+          }
+        },
+        {
+          "text": "shipping-calc runs on port 5503 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "fraud-scorer runs on port 5513 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "billing-sync-eu runs on port 7002 in production.",
+          "meta": {
+            "topic": "billing-sync_sibling"
+          }
+        },
+        {
+          "text": "invoice-gen runs on port 5510 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "search-indexer runs on port 6100 in production.",
+          "meta": {
+            "topic": "search-indexer_target"
+          }
+        },
+        {
+          "text": "notif-dispatch runs on port 5050 in production.",
+          "meta": {
+            "topic": "notif-dispatch_target"
+          }
+        },
+        {
+          "text": "session-store runs on port 2200 in production.",
+          "meta": {
+            "topic": "session-store_target"
+          }
+        },
+        {
+          "text": "session-store-replica runs on port 2201 in production.",
+          "meta": {
+            "topic": "session-store_sibling"
+          }
+        },
+        {
+          "text": "rate-limiter-shadow runs on port 9901 in production.",
+          "meta": {
+            "topic": "rate-limiter_sibling"
+          }
+        },
+        {
+          "text": "payout-scheduler runs on port 5523 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        },
+        {
+          "text": "checkout-worker runs on port 8080 in production.",
+          "meta": {
+            "topic": "checkout-api_sibling"
+          }
+        },
+        {
+          "text": "search-indexer-v2 runs on port 6200 in production.",
+          "meta": {
+            "topic": "search-indexer_sibling"
+          }
+        },
+        {
+          "text": "address-validator runs on port 5516 in production.",
+          "meta": {
+            "topic": "filler"
+          }
+        }
+      ],
+      "probes": []
+    },
+    {
+      "session_id": 3,
+      "timestamp": "2026-01-10T09:10:00",
+      "writes": [],
+      "probes": [
+        {
+          "id": "distractor-01",
+          "question": "What port does checkout-api run on in production?",
+          "expected": [
+            "checkout-api runs on port 8443"
+          ],
+          "must_not_contain": [
+            "checkout-worker runs on port 8080"
+          ]
+        },
+        {
+          "id": "distractor-02",
+          "question": "What port does auth-gateway run on in production?",
+          "expected": [
+            "auth-gateway runs on port 9001"
+          ],
+          "must_not_contain": [
+            "auth-gateway-internal runs on port 9002"
+          ]
+        },
+        {
+          "id": "distractor-03",
+          "question": "What port does billing-sync run on in production?",
+          "expected": [
+            "billing-sync runs on port 7001"
+          ],
+          "must_not_contain": [
+            "billing-sync-eu runs on port 7002"
+          ]
+        },
+        {
+          "id": "distractor-04",
+          "question": "What port does search-indexer run on in production?",
+          "expected": [
+            "search-indexer runs on port 6100"
+          ],
+          "must_not_contain": [
+            "search-indexer-v2 runs on port 6200"
+          ]
+        },
+        {
+          "id": "distractor-05",
+          "question": "What port does notif-dispatch run on in production?",
+          "expected": [
+            "notif-dispatch runs on port 5050"
+          ],
+          "must_not_contain": [
+            "notif-dispatch-retry runs on port 5051"
+          ]
+        },
+        {
+          "id": "distractor-06",
+          "question": "What port does image-resizer run on in production?",
+          "expected": [
+            "image-resizer runs on port 4400"
+          ],
+          "must_not_contain": [
+            "image-resizer-legacy runs on port 4401"
+          ]
+        },
+        {
+          "id": "distractor-07",
+          "question": "What port does media-uploader run on in production?",
+          "expected": [
+            "media-uploader runs on port 3300"
+          ],
+          "must_not_contain": [
+            "media-uploader-canary runs on port 3301"
+          ]
+        },
+        {
+          "id": "distractor-08",
+          "question": "What port does session-store run on in production?",
+          "expected": [
+            "session-store runs on port 2200"
+          ],
+          "must_not_contain": [
+            "session-store-replica runs on port 2201"
+          ]
+        },
+        {
+          "id": "distractor-09",
+          "question": "What port does rate-limiter run on in production?",
+          "expected": [
+            "rate-limiter runs on port 9900"
+          ],
+          "must_not_contain": [
+            "rate-limiter-shadow runs on port 9901"
+          ]
+        },
+        {
+          "id": "distractor-10",
+          "question": "What port does webhook-relay run on in production?",
+          "expected": [
+            "webhook-relay runs on port 8800"
+          ],
+          "must_not_contain": [
+            "webhook-relay-eu runs on port 8801"
+          ]
+        },
+        {
+          "id": "distractor-11",
+          "question": "What port does audit-logger run on in production?",
+          "expected": [
+            "audit-logger runs on port 7700"
+          ],
+          "must_not_contain": [
+            "audit-logger-cold runs on port 7701"
+          ]
+        },
+        {
+          "id": "distractor-12",
+          "question": "What port does feature-flags run on in production?",
+          "expected": [
+            "feature-flags runs on port 6600"
+          ],
+          "must_not_contain": [
+            "feature-flags-staging runs on port 6601"
+          ]
+        }
+      ]
+    }
+  ]
+}

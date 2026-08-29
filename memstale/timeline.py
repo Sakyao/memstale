@@ -22,10 +22,18 @@ MAX_TIME = "9999-12-31T23:59:59+00:00"
 
 
 def parse_time(value: str) -> datetime:
+    """Parse an ISO 8601 string into a timezone-aware datetime.
+
+    Naive timestamps (no offset, e.g. "2026-01-05T09:00:00") are treated as
+    UTC so comparisons against ``now_iso()`` (which carries +00:00) stay safe.
+    """
     try:
-        return datetime.fromisoformat(value)
+        dt = datetime.fromisoformat(value)
     except ValueError:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 def is_effective(memory: Memory, at: str | None = None) -> bool:
