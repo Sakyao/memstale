@@ -33,7 +33,9 @@ import json
 import math
 import os
 import re
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -183,6 +185,62 @@ class RecencyBackend:
         return [it["text"] for it in pool[:k]]
 
 
+class Mem0Backend:
+    """Mem0 (state-of-the-art agent memory library, v2.0.19) — SOTA comparison.
+
+    Runs fully offline: Mem0's `langchain` embedder is pointed at a custom
+    embedder backed by the same hashing embedder used by every other backend,
+    ChromaDB is the local vector store, and `infer=False` disables the LLM
+    fact-extraction step so no API key or model download is needed.
+    """
+
+    name = "mem0"
+
+    def __init__(self):
+        self.mem = None
+        self._tmpdir: str | None = None
+
+    def reset(self):
+        os.environ["MEM0_TELEMETRY"] = "False"  # offline: disable posthog
+        from langchain.embeddings.base import Embeddings  # noqa: PLC0415
+        from mem0 import Memory  # noqa: PLC0415
+
+        class _HashEmbeddings(Embeddings):
+            def __init__(self):
+                self.e = HashingEmbedder()
+
+            def embed_documents(self, texts):
+                return [self.e.embed(t).tolist() for t in texts]
+
+            def embed_query(self, text):
+                return self.e.embed(text).tolist()
+
+        if self._tmpdir:
+            shutil.rmtree(self._tmpdir, ignore_errors=True)
+        self._tmpdir = tempfile.mkdtemp(prefix="mem0-bench-")
+        config = {
+            "llm": {
+                "provider": "ollama",
+                "config": {"model": "unused", "ollama_base_url": "http://localhost:11434"},
+            },
+            "embedder": {"provider": "langchain", "config": {"model": _HashEmbeddings()}},
+            "vector_store": {
+                "provider": "chroma",
+                "config": {"collection_name": "mem0", "path": self._tmpdir},
+            },
+        }
+        self.mem = Memory.from_config(config)
+
+    def write(self, text: str, meta: dict | None = None) -> None:
+        # OSS Mem0 SDK has no timestamp support -> it is time-unaware, which is
+        # exactly the property we want to measure against memstale.
+        self.mem.add(text, infer=False, user_id="bench")
+
+    def query(self, q: str, k: int) -> list[str]:
+        res = self.mem.search(q, top_k=k, filters={"user_id": "bench"})
+        return [r["memory"] for r in res.get("results", [])]
+
+
 # --------------------------------------------------------------------------- #
 # runner
 # --------------------------------------------------------------------------- #
@@ -205,7 +263,7 @@ def main():
         data = json.loads(f.read_text(encoding="utf-8"))
         scenarios[data["suite"]] = data
 
-    backends = [MemstaleBackend(), EmbedBackend(), GrepBackend(), RecencyBackend()]
+    backends = [MemstaleBackend(), Mem0Backend(), EmbedBackend(), GrepBackend(), RecencyBackend()]
 
     print("suite               ", end="")
     for b in backends:
@@ -249,7 +307,7 @@ def _plot(overall: dict, rows: dict) -> None:
         return
 
     os.makedirs(OUT, exist_ok=True)
-    colors = {"memstale": "#2E86AB", "embed": "#E4572E", "grep": "#F2A541", "recency": "#A23B72"}
+    colors = {"memstale": "#2E86AB", "mem0": "#7B2D8B", "embed": "#E4572E", "grep": "#F2A541", "recency": "#A23B72"}
     names = list(overall.keys())
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4.2))

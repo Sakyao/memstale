@@ -239,15 +239,18 @@ distractor_load, entity_confusion). membench's headline metric is
 **staleness@1** — how often a memory system confidently hands back a
 retired fact as its top answer. Data lives in `benchmarks/data/membench/`.
 
-We compared four backends, all with the same hashing embedder (the original
+We compared five backends, all with the same hashing embedder (the original
 membench `embed`/`recency` use Ollama's `nomic-embed-text`; we keep
-everything offline):
+everything offline). The **mem0** backend runs **Mem0 2.0.19** — the
+state-of-the-art open-source agent-memory library — with its ChromaDB
+local vector store and `infer=False` (no LLM fact extraction, no API key):
 
 ![membench](benchmarks/results/membench.png)
 
 | backend | recall@k | precision | staleness@1 | leak_rate | abstention |
 |---|---:|---:|---:|---:|---:|
-| **memstale** | 0.667 | 0.133 | 0.464 | 0.607 | 0.067 |
+| **memstale** | 0.667 | 0.133 | **0.464** | 0.607 | 0.067 |
+| **mem0 2.0.19** (SOTA) | 0.950 | 0.190 | 0.483 | 0.983 | 0.000 |
 | embed (baseline) | 0.950 | 0.190 | 0.483 | 0.983 | 0.000 |
 | grep (baseline) | 0.883 | 0.177 | 0.667 | 0.967 | 0.000 |
 | recency (baseline) | 0.650 | 0.130 | **0.050** | 0.183 | 0.000 |
@@ -260,17 +263,20 @@ everything offline):
   newest k is a near-optimal policy here — and that's exactly the point
   of shipping it as a reference backend (membench's own README says the
   same).
-- **`embed` has the highest recall** because the hashing embedder is good
-  enough to surface the right fact top-k — but it has no time awareness,
-  so when a "switched from tabs to spaces" supersedes a "I use tabs"
-  fact, it happily hands back the tabs version as top-1.
+- **Mem0, the state-of-the-art, behaves like a plain vector store here.**
+  Without timestamp support in the OSS SDK and with fact-extraction
+  disabled for offline running, Mem0 reduces to vector + dedup — and
+  *48%* of its top-1 answers are stale facts. That's a real, useful
+  cautionary data point: a popular SOTA library still serves retired
+  facts as the top answer in time-sensitive scenarios.
 - **`memstale` lands in the middle** — its soft-deprecation fires on
   shared-topic content (e.g. "Our cache layer is Redis" → "We dropped
-  Redis"), but rewriting a fact in different words (tabs → spaces, with
-  little lexical overlap) is exactly where the default topic-Jaccard gate
-  is too narrow. This is a real, useful finding: it tells you the boundary
-  of the content-only conflict resolver and points at the obvious next
-  upgrade (a stronger embedder via `agent_memory.st.HashingEmbedder → STEmbedder`,
+  Redis"), which gives it a modest but real edge over Mem0/embed on
+  staleness@1 (0.464 vs 0.483). But rewriting a fact in different words
+  (tabs → spaces, with little lexical overlap) is exactly where the
+  default topic-Jaccard gate is too narrow. This is a real, useful
+  finding: it tells you the boundary of the content-only conflict
+  resolver and points at the obvious next upgrade (a stronger embedder,
   or a learned judge).
 - **Recall is the cost of being safe.** `recency` wins staleness but
   loses recall; `memstale` trades some recall for stronger guarantees on
@@ -288,7 +294,8 @@ Reproduce:
 |  | synthetic temporal facts (ours) | membench (academic) |
 |---|---:|---:|
 | `memstale` time-aware accuracy@1 | **0.929** | 0.667 recall@k |
-| best pure-baseline (no time) | 0.500 | 0.950 (embed) |
+| Mem0 (SOTA) time-aware behavior | n/a (no time API) | 0.950 recall@k / 0.483 staleness |
+| best pure-baseline (no time) | 0.500 | 0.950 (embed/mem0) |
 | `memstale` anachronism / staleness@1 | **0.007** | 0.464 |
 | best baseline staleness | 0.257 (dense-only) | **0.050** (recency) |
 
@@ -298,9 +305,11 @@ These tell two complementary stories:
   `memstale` dominates, because the question carries the time signal
   and our bitemporal model can act on it.
 - On **implicit "what's true *now*?"** queries, a recency baseline is
-  hard to beat when the latest write is in fact the answer — and our
-  failure mode (rewrite-style supersession) points at the clear next step:
-  a stronger embedder and a learned conflict judge.
+  hard to beat when the latest write is in fact the answer; Mem0 — the
+  popular SOTA — doesn't even try (it has no timestamp support and
+  serves stale facts 48% of the time). Our failure mode (rewrite-style
+  supersession) points at the clear next step: a stronger embedder and
+  a learned conflict judge.
 
 ## 📄 License
 
