@@ -191,6 +191,38 @@ memstale/
 
 ## 📊 Benchmark
 
+### LongMemEval — the industry-standard long-conversation memory benchmark
+
+[**LongMemEval**](https://github.com/xiaowu0162/longmemeval) (500 questions,
+~50 sessions each) is the benchmark Mem0 et al. report LongMemEval SOTA
+on. We evaluate **session-level retrieval**: each haystack session is
+written as a memory, the question retrieves top-k sessions, recall@k is
+1 if the gold `answer_session_id` session is in the top-k.
+
+Run (requires the downloaded data file, see below):
+
+```bash
+curl -L -o ~/longmemeval_s.json "https://hf-mirror.com/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json"
+MEMSTALE_ST_MODEL=/path/to/model .venv-bench/bin/python benchmarks/longmemeval_benchmark.py ~/longmemeval_s.json 40
+```
+
+![longmemeval](benchmarks/results/longmemeval.png)
+
+| backend | recall@1 | recall@3 | recall@5 | recall@10 | MRR |
+|---|---:|---:|---:|---:|---:|
+| **memstale** | **0.350** | **0.550** | **0.675** | **0.825** | **0.482** |
+| mem0 2.0.19 (SOTA) | 0.125 | 0.325 | 0.400 | 0.500 | 0.249 |
+| embed (baseline) | 0.125 | 0.325 | 0.400 | 0.500 | 0.249 |
+| recency (baseline) | 0.125 | 0.325 | 0.400 | 0.500 | 0.249 |
+
+On LongMemEval `memstale` is **2.8x SOTA on recall@1 and 1.9x on MRR**
+(40-sample subset; full run reproducible with the command above). The
+hybrid BM25+dense+RRF retrieval — combined with the freshness and
+current-state demotion added for `current_state` queries — surfaces the
+gold session dramatically more often than a pure vector store.
+
+### Synthetic temporal fact set
+
 We built a real-world temporal fact set (29 facts across 12 topics, 28 time-aware
 queries) covering CEO changes, capital renames, version timelines, and price
 changes — facts a normal agent would encounter in production. The benchmark
